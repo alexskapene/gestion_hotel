@@ -135,3 +135,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes scalePulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ✅ ta classe */
+.animate-scale-pulse {
+  animation: scalePulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

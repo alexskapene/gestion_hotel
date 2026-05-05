@@ -2,7 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { X, MapPin, Star, Users, Wifi, Calendar } from "lucide-react";
+import {
+  X,
+  MapPin,
+  Star,
+  Users,
+  Wifi,
+  Calendar,
+  Car,
+  Coffee,
+  Tv2Icon,
+  Phone,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "./ui/button";
+
+const amenityIcons: Record<string, React.ReactNode> = {
+  wifi: <Wifi className="w-3 h-3 " />,
+  parking: <Car className="w-3 h-3 " />,
+  restaurant: <Coffee className="w-3 h-3 " />,
+  tv: <Tv2Icon className="w-3 h-3 " />,
+  ac: <Phone className="w-3 h-3 " />,
+};
 
 export const HotelDetailModal = () => {
   const { selectedHotel, closeHotel, user, addReservation } = useApp();
@@ -46,6 +67,7 @@ export const HotelDetailModal = () => {
           ),
         )
       : 0;
+
   const total = Math.round(room.price * nights);
 
   const handleBook = () => {
@@ -53,7 +75,7 @@ export const HotelDetailModal = () => {
 
     addReservation({
       hotelId: hotel.id,
-      hotel: hotel.name, // ✅ FIX
+      hotel: hotel.name,
       room: room.type,
       roomNumber: String(room.id),
       userId: user.id,
@@ -77,10 +99,7 @@ export const HotelDetailModal = () => {
       role="dialog"
       aria-modal="true"
     >
-      <div
-        className="absolute inset-0 bg-primary/60 backdrop-blur-sm"
-        onClick={closeHotel}
-      />
+      <div className="absolute inset-0 bg-gray-50/35 backdrop-blur-sm" />
       <div className="relative bg-card rounded-3xl shadow-[var(--shadow-elegant)] max-w-6xl w-full max-h-[92vh] overflow-y-auto">
         <button
           onClick={closeHotel}
@@ -101,14 +120,14 @@ export const HotelDetailModal = () => {
               />
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {hotel.image.map((src, i) => (
+              {hotel.image.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
                   className={`aspect-square rounded-lg overflow-hidden border-2 transition ${i === activeImage ? "border-accent" : "border-transparent opacity-70 hover:opacity-100"}`}
                 >
                   <img
-                    src={src}
+                    src={img}
                     alt=""
                     className="w-full h-full object-cover"
                   />
@@ -178,23 +197,63 @@ export const HotelDetailModal = () => {
 
             <div className="mb-6">
               <h3 className="font-display text-lg mb-3">Choisir une chambre</h3>
-              <div className="space-y-2">
+              <div className="flex flex-wrap  gap-4">
                 {hotel.rooms.map((r, i) => (
-                  <button
+                  <div
                     key={r.id}
                     onClick={() => setSelectedRoom(i)}
-                    className={`w-full text-left p-3 rounded-xl border transition flex items-center justify-between ${i === selectedRoom ? "border-accent bg-accent/5" : "border-border hover:border-accent/50"}`}
+                    className="w-1/3 md:w-1/4"
                   >
-                    <div>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Users className="w-3 h-3" /> {r.capacity} pers ·{" "}
-                        {r.available} dispo
-                      </p>
+                    <div className="w-full">
+                      <img
+                        src={r.image}
+                        alt=""
+                        className={`w-full h-full object-cover ${i === selectedRoom ? "opacity-35" : ""}`}
+                      />
                     </div>
-                    <p className="font-display text-lg">
-                      {Math.round(r.price)}$
-                    </p>
-                  </button>
+                    <div className="flex justify-between mb-2 mt-4">
+                      <div>
+                        <p>Capacité</p>
+                        <span className="flex justify-start items-center gap-x-2 text-xs">
+                          <Users className="w-3 h-3" />
+                          {r.capacity} {`personne${r.capacity > 1 ? "s" : ""}`}
+                        </span>
+                      </div>
+                      <div>
+                        <Badge
+                          className={`${r.available == true ? "bg-green-600/65" : "bg-red-600/65"}`}
+                        >{`${r.available == true ? "Disponible" : "Occupée"}`}</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-display text-xl font-bold">
+                        {Math.round(r.price)}${" "}
+                        <span className="text-xs font-light">/ nuit</span>
+                      </p>
+                      <div className="flex gap-2 my-2">
+                        {r.amenities.map((amenity) => (
+                          <div
+                            key={amenity}
+                            className="w-7 h-7 rounded-full bg-muted flex items-center justify-center"
+                          >
+                            {amenityIcons[amenity]}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => setSelectedRoom(i)}
+                      variant={"default"}
+                      size={"default"}
+                      className={`w-full`}
+                    >
+                      <div>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          Reserver
+                        </p>
+                      </div>
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>

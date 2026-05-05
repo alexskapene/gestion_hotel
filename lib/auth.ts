@@ -1,4 +1,5 @@
 import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
@@ -8,46 +9,71 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   // adapter: PrismaAdapter(prisma), // Gardez désactivé comme demandé précédemment
   providers: [
-    {
-      ...authConfig.providers[0],
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
       async authorize(credentials) {
+        console.log("Authorize called with:", credentials)
+        
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials")
+          console.log("Missing email or password")
+          return null
         }
 
+        const email = (credentials.email as string).toLowerCase().trim()
+        const password = credentials.password as string
+
+        console.log("Processing login for:", email)
+
         // --- Mock login for demo/testing without backend ---
-        if (credentials.email === "admin@demo.com") {
+        if (email === "admin@demo.com") {
+          console.log("Mock admin matched!")
           return { id: "mock-admin", email: "admin@demo.com", role: "ADMIN", name: "Mock Admin" }
         }
-        if (credentials.email === "hotel@demo.com") {
+        if (email === "hotel@demo.com") {
+          console.log("Mock hotel matched!")
           return { id: "mock-hotel", email: "hotel@demo.com", role: "HOTEL", name: "Mock Hotel" }
         }
-        if (credentials.email === "client@demo.com") {
+        if (email === "client@demo.com") {
+          console.log("Mock client matched!")
           return { id: "mock-client", email: "client@demo.com", role: "CLIENT", name: "Mock Client" }
         }
         // ----------------------------------------------------
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email as string
+        try {
+          console.log("Searching for user with email:", email)
+          const user = await prisma.user.findUnique({
+            where: {
+              email: email
+            }
+          })
+
+          if (!user || !user.password) {
+            console.log("User not found or no password in DB")
+            return null
           }
-        })
 
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials")
+          console.log("User found, comparing passwords...")
+          const isPasswordCorrect = await bcrypt.compare(
+            password,
+            user.password
+          )
+
+          if (!isPasswordCorrect) {
+            console.log("Password mismatch")
+            return null
+          }
+
+          console.log("Login successful for:", email)
+          return user
+        } catch (error) {
+          console.error("Critical Auth error:", error)
+          return null
         }
-
-        const isPasswordCorrect = await bcrypt.compare(
-          credentials.password as string,
-          user.password
-        )
-
-        if (!isPasswordCorrect) {
-          throw new Error("Invalid credentials")
-        }
-
-        return user
       }
-    }
+    })
   ],
 })

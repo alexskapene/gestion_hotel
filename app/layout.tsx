@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Poppins, DM_Sans } from "next/font/google";
 import AuthProvider from "@/components/providers/AuthProvider";
 import "./globals.css";
+import { AppProvider } from "@/context/AppContext";
+import { HotelDetailModal } from "@/components/HotelDetailModal";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -35,9 +37,12 @@ export default function RootLayout({
     <html lang="fr" className={`${poppins.variable} ${dmSans.variable}`}>
       <body className="font-sans antialiased bg-background text-foreground flex min-h-screen flex-col">
         <AuthProvider>
-          <main className="flex-1">{children}</main>
+          <AppProvider>
+            <main className="flex-1">{children}</main>
+            <HotelDetailModal />
+          </AppProvider>
         </AuthProvider>
       </body>
-    </html> 
+    </html>
   );
 }

@@ -92,241 +92,184 @@ export const HotelDetailModal = () => {
     });
     setBooked(true);
   };
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="absolute inset-0 bg-gray-50/35 backdrop-blur-sm" />
-      <div className="relative bg-card rounded-3xl shadow-[var(--shadow-elegant)] max-w-6xl w-full max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-xl relative">
+        {/* CLOSE */}
         <button
           onClick={closeHotel}
-          className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/95 backdrop-blur flex items-center justify-center hover:bg-secondary transition"
-          aria-label="Fermer"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="grid lg:grid-cols-2 gap-0">
-          {/* Gallery */}
-          <div className="p-6 lg:p-8">
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-3">
-              <img
-                src={hotel.image[activeImage]}
-                alt={hotel.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {hotel.image.map((img, i) => (
-                <button
+        <div className="grid lg:grid-cols-3 gap-6 p-6">
+          {/* LEFT SIDE */}
+          <div className="lg:col-span-2">
+            {/* IMAGE GRID */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden">
+                <img
+                  src={hotel.image[activeImage]}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {hotel.image.slice(1, 5).map((img, i) => (
+                <img
                   key={i}
-                  onClick={() => setActiveImage(i)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 transition ${i === activeImage ? "border-accent" : "border-transparent opacity-70 hover:opacity-100"}`}
-                >
-                  <img
-                    src={img}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                </button>
+                  src={img}
+                  onClick={() => setActiveImage(i + 1)}
+                  className="rounded-xl object-cover w-full h-full cursor-pointer hover:opacity-80"
+                />
               ))}
             </div>
 
-            {/* Map zone */}
-            <div className="mt-6 relative aspect-[2/1] rounded-2xl overflow-hidden border border-border bg-secondary">
-              <div
-                className="absolute inset-0 opacity-90"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(45deg, hsl(var(--accent-soft)) 25%, transparent 25%), linear-gradient(-45deg, hsl(var(--accent-soft)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(var(--accent-soft)) 75%), linear-gradient(-45deg, transparent 75%, hsl(var(--accent-soft)) 75%)",
-                  backgroundSize: "30px 30px",
-                  backgroundPosition: "0 0, 0 15px, 15px -15px, -15px 0px",
-                }}
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center shadow-[var(--shadow-gold)] animate-pulse">
-                    <MapPin className="w-6 h-6 text-accent-foreground" />
-                  </div>
+            {/* TITLE */}
+            <h2 className="text-3xl font-bold mb-2">{hotel.name}</h2>
+
+            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+              <span className="flex items-center gap-1">
+                <MapPin className="w-4 h-4" /> {hotel.city}
+              </span>
+              <span className="flex items-center gap-1">
+                <Star className="w-4 h-4 text-yellow-500" />
+                {hotel.rating} ({hotel.reviews})
+              </span>
+            </div>
+
+            {/* TAGS */}
+            <div className="flex gap-2 mb-6 flex-wrap">
+              <Badge>Minimalist</Badge>
+              <Badge>Beach</Badge>
+              <Badge>Luxury</Badge>
+            </div>
+
+            {/* FEATURES */}
+            <div className="flex gap-6 mb-6 text-sm">
+              {hotel.amenities.map((a) => (
+                <div key={a} className="flex items-center gap-1">
+                  {amenityIcons[a]} {a}
                 </div>
-              </div>
-              <button className="absolute bottom-3 right-3 btn-ghost text-xs px-3 py-1.5 bg-background/95 backdrop-blur">
-                Voir sur la carte
-              </button>
-            </div>
-          </div>
-
-          {/* Details */}
-          <div className="p-6 lg:p-8 lg:pl-2">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-              <MapPin className="w-4 h-4" /> {hotel.city}
-            </div>
-            <h2 className="font-display text-3xl lg:text-4xl text-foreground mb-3">
-              {hotel.name}
-            </h2>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-accent text-accent" />
-                <span className="font-semibold">{hotel.rating}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({hotel.reviews} avis)
-                </span>
-              </div>
+              ))}
             </div>
 
-            <p className="text-muted-foreground leading-relaxed mb-6">
+            {/* DESCRIPTION */}
+            <p className="text-gray-600 leading-relaxed mb-6">
               {hotel.description}
             </p>
 
-            <div className="mb-6">
-              <h3 className="font-display text-lg mb-3">Équipements</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {hotel.amenities.map((a) => (
-                  <div
-                    key={a}
-                    className="flex items-center gap-2 text-sm text-foreground"
-                  >
-                    <Wifi className="w-4 h-4 text-accent" /> {a}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* ROOMS */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {hotel.rooms.map((r, i) => (
+                <div
+                  key={r.id}
+                  onClick={() => setSelectedRoom(i)}
+                  className={`border rounded-xl p-3 cursor-pointer transition ${
+                    i === selectedRoom ? "border-black" : "border-gray-200"
+                  }`}
+                >
+                  <img
+                    src={r.image}
+                    className="rounded-lg mb-2 w-full h-32 object-cover"
+                  />
 
-            <div className="mb-6">
-              <h3 className="font-display text-lg mb-3">Choisir une chambre</h3>
-              <div className="flex flex-wrap  gap-4">
-                {hotel.rooms.map((r, i) => (
-                  <div
-                    key={r.id}
-                    onClick={() => setSelectedRoom(i)}
-                    className="w-1/3 md:w-1/4"
-                  >
-                    <div className="w-full">
-                      <img
-                        src={r.image}
-                        alt=""
-                        className={`w-full h-full object-cover ${i === selectedRoom ? "opacity-35" : ""}`}
-                      />
-                    </div>
-                    <div className="flex justify-between mb-2 mt-4">
-                      <div>
-                        <p>Capacité</p>
-                        <span className="flex justify-start items-center gap-x-2 text-xs">
-                          <Users className="w-3 h-3" />
-                          {r.capacity} {`personne${r.capacity > 1 ? "s" : ""}`}
-                        </span>
-                      </div>
-                      <div>
-                        <Badge
-                          className={`${r.available == true ? "bg-green-600/65" : "bg-red-600/65"}`}
-                        >{`${r.available == true ? "Disponible" : "Occupée"}`}</Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-display text-xl font-bold">
-                        {Math.round(r.price)}${" "}
-                        <span className="text-xs font-light">/ nuit</span>
-                      </p>
-                      <div className="flex gap-2 my-2">
-                        {r.amenities.map((amenity) => (
-                          <div
-                            key={amenity}
-                            className="w-7 h-7 rounded-full bg-muted flex items-center justify-center"
-                          >
-                            {amenityIcons[amenity]}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => setSelectedRoom(i)}
-                      variant={"default"}
-                      size={"default"}
-                      className={`w-full`}
-                    >
-                      <div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          Reserver
-                        </p>
-                      </div>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  <p className="font-semibold text-sm">{r.type}</p>
 
-            {/* Booking */}
-            <div className="bg-secondary/50 rounded-2xl p-5 border border-border">
-              {booked ? (
-                <div className="text-center py-4">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-success/10 flex items-center justify-center mb-3">
-                    <Calendar className="w-6 h-6 text-success" />
-                  </div>
-                  <p className="font-display text-xl mb-1">
-                    Réservation confirmée
+                  <p className="text-xs text-gray-500 mb-2">
+                    {r.capacity} pers.
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Retrouvez-la dans votre dashboard.
-                  </p>
+
+                  <p className="font-bold">${r.price}/nuit</p>
                 </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div>
-                      <label className="text-xs text-muted-foreground">
-                        Arrivée
-                      </label>
-                      <input
-                        type="date"
-                        value={checkIn}
-                        onChange={(e) => setCheckIn(e.target.value)}
-                        className="input-luxe mt-1"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-muted-foreground">
-                        Départ
-                      </label>
-                      <input
-                        type="date"
-                        value={checkOut}
-                        onChange={(e) => setCheckOut(e.target.value)}
-                        className="input-luxe mt-1"
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <label className="text-xs text-muted-foreground">
-                      Voyageurs
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={room.capacity}
-                      value={guests}
-                      onChange={(e) => setGuests(+e.target.value)}
-                      className="input-luxe mt-1"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between mb-3 pt-3 border-t border-border">
-                    <span className="text-sm text-muted-foreground">
-                      {nights} nuit{nights > 1 ? "s" : ""}
-                    </span>
-                    <span className="font-display text-2xl">{total}€</span>
-                  </div>
-                  <button
-                    onClick={handleBook}
-                    disabled={!nights}
-                    className="btn-gold w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Réserver maintenant
-                  </button>
-                </>
-              )}
+              ))}
             </div>
+          </div>
+
+          {/* RIGHT SIDE (BOOKING CARD) */}
+          <div className="bg-gray-50 rounded-2xl p-5 h-fit border relative">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">
+                ${room.price}
+                <span className="text-sm text-gray-500"> / nuit</span>
+              </h3>
+              <Badge>10% Off</Badge>
+            </div>
+
+            {/* DATES */}
+            <div className="mb-3">
+              <label className="text-xs">Check In</label>
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="text-xs">Check Out</label>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+
+            {/* GUESTS */}
+            <div className="mb-4">
+              <label className="text-xs">Guests</label>
+              <input
+                type="number"
+                min={1}
+                max={room.capacity}
+                value={guests}
+                onChange={(e) => setGuests(+e.target.value)}
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+
+            {/* PRICE */}
+            <div className="border-t pt-3 mb-4 text-sm">
+              <div className="flex justify-between">
+                <span>{nights} nights</span>
+                <span>${room.price * nights}</span>
+              </div>
+            </div>
+
+            {/* TOTAL */}
+            <div className="flex justify-between font-bold text-lg mb-4">
+              <span>Total</span>
+              <span>${total}</span>
+            </div>
+
+            {/* BUTTON */}
+            <Button
+              onClick={handleBook}
+              disabled={!nights}
+              variant={"default"}
+              size={"default"}
+              className="w-full disabled:opacity-60"
+            >
+              Réserver
+            </Button>
+
+            {/* SUCCESS */}
+            {booked && (
+              <div className="absolute top-0 left-0 flex flex-col w-full h-auto md:w-1/4 bg-card border justify-center items-center p-12 gap-4 z-50">
+                <div className="flex justify-center items-center w-24 h-24 rounded-full bg-primary text-4xl transition ease-in-out">
+                  😁
+                </div>
+                <p className="font-black text-2xl text-center mt-3">
+                  Réservation confirmée
+                </p>
+
+                <Button variant={"default"} size={"lg"}>
+                  Continuer
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

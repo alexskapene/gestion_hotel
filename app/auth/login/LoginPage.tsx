@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, EyeOff, Hotel, Loader2, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Hotel, Loader2, Lock, Mail, User, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -318,6 +318,17 @@ function LoginContent() {
                   className="text-primary font-medium hover:underline"
                 >
                   Créer un compte
+                </Link>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-muted flex flex-col items-center gap-3">
+                <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Espace Interne</p>
+                <Link
+                  href="/admin/auth/login"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-secondary hover:text-accent transition-colors py-2 px-4 rounded-full border border-secondary/10 hover:border-accent/20 hover:bg-accent/5"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Portail Administration
                 </Link>
               </div>
             </CardContent>

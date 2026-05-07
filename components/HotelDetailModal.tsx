@@ -94,11 +94,11 @@ export const HotelDetailModal = () => {
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-xl relative">
+      <div className="bg-white  w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-xl relative">
         {/* CLOSE */}
         <button
           onClick={closeHotel}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
+          className="fixe top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
         >
           <X className="w-5 h-5" />
         </button>

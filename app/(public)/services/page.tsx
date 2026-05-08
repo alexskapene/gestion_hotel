@@ -1,15 +1,15 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Search,
   CalendarCheck,
-  ShieldCheck,
-  MapPin,
-  Star,
-  Headphones,
   CheckCircle,
+  Headphones,
+  MapPin,
+  Search,
+  ShieldCheck,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -52,7 +52,7 @@ export default function ServicesPage() {
     <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* HERO */}
-        <section className="bg-gradient-to-br from-secondary via-background to-muted py-16">
+        <section className="bg-background py-16">
           <div className="container mx-auto px-4 text-center max-w-2xl space-y-4">
             <h1 className="text-3xl md:text-4xl font-bold">Nos Services</h1>
 
@@ -60,14 +60,6 @@ export default function ServicesPage() {
               Simplifiez votre réservation d’hôtel grâce à une plateforme
               moderne, rapide et sécurisée.
             </p>
-
-            <div className="pt-4">
-              <Link href="/hotels">
-                <Button size="lg" className="rounded-full">
-                  Explorer les hôtels
-                </Button>
-              </Link>
-            </div>
           </div>
         </section>
 

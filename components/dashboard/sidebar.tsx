@@ -19,7 +19,7 @@ import {
 import Image from "next/image";
 
 interface SidebarProps {
-  type: "client" | "hotel";
+  type: "client" | "hotel" | "admin";
   isOpen?: boolean;
   onClose?: () => void;
 }
@@ -58,9 +58,21 @@ const hotelMenuItems = [
   { href: "/dashboard/hotel/settings", icon: Settings, label: "Paramètres" },
 ];
 
+const adminMenuItems = [
+  { href: "/dashboard/admin", icon: LayoutDashboard, label: "Tableau de Bord" },
+  { href: "/dashboard/admin/hotels", icon: Hotel, label: "Gestion Hôtels" },
+  { href: "/dashboard/admin/clients", icon: User, label: "Gestion Clients" },
+  { href: "/dashboard/admin/reservations", icon: CalendarDays, label: "Réservations" },
+  { href: "/dashboard/admin/utilisateurs", icon: User, label: "Utilisateurs" },
+  { href: "/dashboard/admin/parametres", icon: Settings, label: "Paramètres" },
+];
+
 export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const menuItems = type === "client" ? clientMenuItems : hotelMenuItems;
+  const menuItems = 
+    type === "client" ? clientMenuItems : 
+    type === "hotel" ? hotelMenuItems : 
+    adminMenuItems;
 
   return (
     <>

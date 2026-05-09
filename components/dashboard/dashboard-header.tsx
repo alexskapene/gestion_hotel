@@ -15,7 +15,7 @@ import Link from "next/link";
 interface DashboardHeaderProps {
   title: string;
   userName: string;
-  userType: "client" | "hotel";
+  userType: "client" | "hotel" | "admin";
   onMenuClick?: () => void;
 }
 

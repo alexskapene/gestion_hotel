@@ -1,174 +1,131 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   CalendarCheck,
-  CheckCircle,
   Headphones,
   MapPin,
   Search,
   ShieldCheck,
   Star,
+  TrendingUp,
 } from "lucide-react";
-import Link from "next/link";
+import Image from "next/image";
+import { CTASection } from "@/components/landing/cta-section";
 
-const services = [
+const allFeatures = [
   {
-    title: "Recherche intelligente",
-    icon: <Search className="w-6 h-6" />,
-    description:
-      "Trouvez rapidement les meilleurs hôtels selon vos préférences.",
+    type: "Voyageur",
+    title: "Recherche intelligente & intuitive",
+    description: "Trouvez l'établissement idéal en quelques secondes. Notre moteur de recherche croise vos préférences avec les meilleures offres de la province pour vous garantir un séjour sur mesure.",
+    image: "/hero.jpg",
+    icon: <Search className="w-6 h-6 text-primary" />,
   },
   {
-    title: "Réservation rapide",
-    icon: <CalendarCheck className="w-6 h-6" />,
-    description: "Réservez votre chambre en quelques clics seulement.",
+    type: "Hôtelier",
+    title: "Gestion & Visibilité simplifiée",
+    description: "Digitalisez votre hôtel sans effort. Profitez d'une exposition immédiate et d'outils de gestion intuitifs pour optimiser votre taux d'occupation et simplifier votre quotidien.",
+    image: "/room.jpg",
+    icon: <TrendingUp className="w-6 h-6 text-primary" />,
   },
   {
-    title: "Paiement sécurisé",
-    icon: <ShieldCheck className="w-6 h-6" />,
-    description: "Vos transactions sont protégées et fiables.",
+    type: "Voyageur",
+    title: "Sécurité & Tranquillité d'esprit",
+    description: "Réservez avec une confiance absolue. Chaque transaction est sécurisée et chaque établissement est rigoureusement vérifié pour vous offrir l'excellence sans compromis.",
+    image: "/hero.jpg",
+    icon: <ShieldCheck className="w-6 h-6 text-primary" />,
   },
   {
-    title: "Localisation précise",
-    icon: <MapPin className="w-6 h-6" />,
-    description: "Découvrez les hôtels proches de vous facilement.",
-  },
-  {
-    title: "Avis clients",
-    icon: <Star className="w-6 h-6" />,
-    description: "Consultez des avis pour faire le meilleur choix.",
-  },
-  {
-    title: "Support 24/7",
-    icon: <Headphones className="w-6 h-6" />,
-    description: "Une assistance disponible à tout moment.",
+    type: "Hôtelier",
+    title: "Analytiques & Croissance",
+    description: "Prenez des décisions basées sur des données réelles. Suivez vos performances, analysez les tendances de réservation et développez votre activité grâce à nos outils d'analyse avancés.",
+    image: "/room.jpg",
+    icon: <Star className="w-6 h-6 text-primary" />,
   },
 ];
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
-        {/* HERO */}
-        <section className="bg-background py-16">
-          <div className="container mx-auto px-4 text-center max-w-2xl space-y-4">
-            <h1 className="text-3xl md:text-4xl font-bold">Nos Services</h1>
+    <div className="min-h-screen bg-background">
+      <main className="w-full">
+        {/* HERO SECTION - Optimized Responsive */}
+        <section className="relative min-h-[45vh] md:min-h-[50vh] flex items-center justify-center overflow-hidden py-16 md:py-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+            style={{
+              backgroundImage: "url('/hero.jpg')",
+            }}
+          />
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-[1px]" />
 
-            <p className="text-muted-foreground">
-              Simplifiez votre réservation d’hôtel grâce à une plateforme
-              moderne, rapide et sécurisée.
+          <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center text-white space-y-6">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl font-bold leading-[1.1] max-w-5xl mx-auto text-balance">
+              L&apos;écosystème complet de <span className="text-primary">l&apos;hôtellerie</span>
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-3xl mx-auto text-balance leading-relaxed">
+              Une plateforme unique qui connecte les voyageurs en quête d&apos;excellence avec les hôteliers les plus prestigieux de l&apos;Ituri.
             </p>
           </div>
         </section>
 
-        {/* CONTEXTE */}
-        <section className="py-12 container mx-auto px-4 max-w-3xl text-center">
-          <p className="text-muted-foreground leading-relaxed">
-            Trouver un hébergement fiable peut être compliqué. Notre plateforme
-            a été conçue pour vous offrir une expérience simple, rapide et
-            sécurisée. Comparez, choisissez et réservez les meilleurs hôtels en
-            toute confiance.
-          </p>
-        </section>
+        {/* UNIFIED SERVICES SECTION */}
+        <section className="py-24 container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center mb-24 space-y-4">
+            <h2 className="font-serif text-3xl md:text-5xl font-bold italic">Nos Solutions Globales</h2>
+            <div className="h-1 w-24 bg-primary mx-auto" />
+            <p className="text-muted-foreground text-lg">Découvrez comment nous réinventons l&apos;expérience hôtelière pour tous.</p>
+          </div>
 
-        {/* SERVICES */}
-        <section className="py-12 container mx-auto px-4">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => (
-              <Card
-                key={index}
-                className="rounded-2xl hover:shadow-lg transition"
+          <div className="space-y-32">
+            {allFeatures.map((feature, index) => (
+              <div 
+                key={index} 
+                className={`flex flex-col lg:flex-row items-center gap-16 ${index % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}
               >
-                <CardContent className="p-6 space-y-4">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-primary/10 text-primary">
-                    {service.icon}
+                {/* Image side */}
+                <div className="flex-1 relative aspect-[16/10] w-full rounded-3xl overflow-hidden shadow-2xl group">
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    fill
+                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </div>
+
+                {/* Content side */}
+                <div className="flex-1 space-y-8">
+                  <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-bold uppercase tracking-widest">
+                    <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                    {feature.type}
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h3 className="font-serif text-3xl md:text-4xl font-bold leading-tight">
+                      {feature.title}
+                    </h3>
+                    <p className="text-lg text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
                   </div>
 
-                  <h3 className="font-semibold text-lg">{service.title}</h3>
-
-                  <p className="text-sm text-muted-foreground">
-                    {service.description}
-                  </p>
-                </CardContent>
-              </Card>
+                  <div className="pt-4 flex items-center gap-6">
+                    <div className="w-14 h-14 bg-foreground text-white flex items-center justify-center rounded-2xl shadow-lg">
+                      {feature.icon}
+                    </div>
+                    <Button variant="link" className="text-primary p-0 h-auto font-bold text-lg hover:no-underline group">
+                      En savoir plus 
+                      <span className="ml-2 inline-block transition-transform group-hover:translate-x-2">→</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* COMMENT ÇA MARCHE */}
-        <section className="py-16 bg-muted">
-          <div className="container mx-auto px-4 text-center space-y-10">
-            <h2 className="text-2xl font-bold">Comment ça marche ?</h2>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="space-y-3">
-                <div className="text-3xl font-bold text-primary">1</div>
-                <h3 className="font-semibold">Recherchez</h3>
-                <p className="text-sm text-muted-foreground">
-                  Entrez votre destination et trouvez les hôtels disponibles.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="text-3xl font-bold text-primary">2</div>
-                <h3 className="font-semibold">Comparez</h3>
-                <p className="text-sm text-muted-foreground">
-                  Consultez les prix, avis et services proposés.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="text-3xl font-bold text-primary">3</div>
-                <h3 className="font-semibold">Réservez</h3>
-                <p className="text-sm text-muted-foreground">
-                  Finalisez votre réservation en toute sécurité.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* POURQUOI NOUS */}
-        <section className="py-16 container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-8 text-center">
-            <h2 className="text-2xl font-bold">
-              Pourquoi choisir notre plateforme ?
-            </h2>
-
-            <div className="grid md:grid-cols-2 gap-6 text-left">
-              {[
-                "Plateforme simple et rapide",
-                "Hôtels vérifiés et fiables",
-                "Paiement sécurisé",
-                "Support client disponible",
-              ].map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <CheckCircle className="text-primary w-5 h-5" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
-        <section className="py-16 bg-primary text-primary-foreground text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            Prêt à réserver votre hôtel ?
-          </h2>
-
-          <p className="mb-6 opacity-90">
-            Découvrez les meilleures offres dès maintenant.
-          </p>
-
-          <Link href="/hotels">
-            <Button size="lg" variant="secondary" className="rounded-full">
-              Explorer les hôtels
-            </Button>
-          </Link>
-        </section>
+        <CTASection />
       </main>
     </div>
   );

@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MapPin, Phone, Send, MessageSquare } from "lucide-react";
 import { useState } from "react";
+import { CTASection } from "@/components/landing/cta-section";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -23,115 +24,130 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(form);
-
-    // 👉 plus tard: envoyer vers backend
-    alert("Message envoyé !");
-
+    alert("Message envoyé ! Nous vous répondrons sous peu.");
     setForm({ name: "", email: "", message: "" });
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
-        {/* HERO */}
-        <section className="bg-gradient-to-br from-secondary via-background to-muted py-16">
-          <div className="container mx-auto px-4 text-center max-w-2xl space-y-4">
-            <h1 className="text-3xl md:text-4xl font-bold">Contactez-nous</h1>
+    <div className="min-h-screen bg-background">
+      <main className="w-full">
+        {/* HERO SECTION */}
+        <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: "url('/room.jpg')",
+            }}
+          />
+          <div className="absolute inset-0 bg-black/70" />
 
-            <p className="text-muted-foreground">
-              Une question, un problème ou une suggestion ? Notre équipe est là
-              pour vous aider.
+          <div className="relative z-10 container mx-auto px-6 text-center text-white space-y-6">
+            <h1 className="font-serif text-4xl md:text-6xl font-bold leading-tight max-w-4xl mx-auto">
+              Besoin d&apos;aide ? <span className="text-primary">Contactez-nous</span>
+            </h1>
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+              Notre équipe est à votre disposition pour répondre à toutes vos questions et vous accompagner dans votre réservation.
             </p>
           </div>
         </section>
 
         {/* CONTACT SECTION */}
-        <section className="py-16 container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-10">
-            {/* INFOS */}
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Nos coordonnées</h2>
-
+        <section className="py-24 container mx-auto px-6">
+          <div className="grid lg:grid-cols-12 gap-16">
+            {/* INFOS - Floating Pattern Style */}
+            <div className="lg:col-span-5 space-y-12">
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-primary" />
-                  <span>contact@hotelapp.com</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-primary" />
-                  <span>+243 900 000 000</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  <span>Kinshasa, RDC</span>
-                </div>
+                <h2 className="font-serif text-3xl font-bold italic">Parlons de votre prochain séjour</h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  Que vous ayez une question spécifique sur un hôtel ou que vous souhaitiez en savoir plus sur notre plateforme, nous sommes là pour vous.
+                </p>
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                Nous répondons généralement dans un délai de 24h.
-              </p>
+              <div className="grid gap-6">
+                {[
+                  { icon: Mail, label: "Email", value: "contact@hotelapp.com", desc: "Réponse sous 24h" },
+                  { icon: Phone, label: "Téléphone", value: "+243 900 000 000", desc: "Lun - Ven, 9h - 18h" },
+                  { icon: MapPin, label: "Bureau", value: "Ituri, RD Congo", desc: "Province de l'Ituri" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4 p-6 bg-muted/50 border border-border rounded-none group hover:border-primary transition-colors duration-300">
+                    <div className="w-12 h-12 bg-foreground text-primary flex items-center justify-center shrink-0">
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
+                      <p className="font-bold text-lg">{item.value}</p>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* FORMULAIRE */}
-            <Card>
-              <CardContent className="p-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Input
-                      name="name"
-                      placeholder="Votre nom"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
-                    />
+            <div className="lg:col-span-7">
+              <Card className="bg-foreground border border-white/10 text-white shadow-2xl rounded-none p-4 md:p-8">
+                <CardContent className="p-4 md:p-8 space-y-8">
+                  <div className="space-y-2">
+                    <h3 className="font-serif text-3xl font-bold text-primary flex items-center gap-3">
+                      <MessageSquare className="w-8 h-8" />
+                      Envoyez un message
+                    </h3>
+                    <p className="text-white/60">Remplissez le formulaire ci-dessous et nous vous recontacterons très rapidement.</p>
                   </div>
 
-                  <div>
-                    <Input
-                      type="email"
-                      name="email"
-                      placeholder="Votre email"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                  <form onSubmit={handleSubmit} className="grid gap-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-white/50">Votre Nom</label>
+                        <Input
+                          name="name"
+                          placeholder="Ex: Jean Dupont"
+                          className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-12 rounded-none focus:ring-primary"
+                          value={form.name}
+                          onChange={handleChange}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-white/50">Votre Email</label>
+                        <Input
+                          type="email"
+                          name="email"
+                          placeholder="Ex: jean@email.com"
+                          className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-12 rounded-none focus:ring-primary"
+                          value={form.email}
+                          onChange={handleChange}
+                          required
+                        />
+                      </div>
+                    </div>
 
-                  <div>
-                    <Textarea
-                      name="message"
-                      placeholder="Votre message..."
-                      rows={5}
-                      value={form.message}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-white/50">Votre Message</label>
+                      <Textarea
+                        name="message"
+                        placeholder="Comment pouvons-nous vous aider ?"
+                        rows={6}
+                        className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-none focus:ring-primary resize-none"
+                        value={form.message}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
 
-                  <Button type="submit" className="w-full">
-                    <Send className="w-4 h-4 mr-2" />
-                    Envoyer le message
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                    <Button type="submit" className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/80 rounded-full text-lg font-bold">
+                      <Send className="w-5 h-5 mr-2" />
+                      Envoyer le message
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-16 bg-muted text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            Besoin d’aide pour réserver ?
-          </h2>
-
-          <p className="text-muted-foreground mb-6">
-            Consultez nos hôtels disponibles et trouvez votre séjour idéal.
-          </p>
-
-          <Button>Explorer les hôtels</Button>
-        </section>
+        {/* BOTTOM CTA - Using Home Pattern */}
+        <CTASection />
       </main>
     </div>
   );

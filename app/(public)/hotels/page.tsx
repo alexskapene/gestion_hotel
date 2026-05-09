@@ -1,6 +1,6 @@
 "use client";
+import { HotelCard } from "@/components/HotelCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,35 +19,17 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
-import {
-  Car,
-  Coffee,
-  MapPin,
-  Search,
-  SlidersHorizontal,
-  Wifi,
-} from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 import { Hotels } from "@/data/mockData";
-import { HotelCard } from "@/components/HotelCard";
+import { MapPin, Search, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
 
 const cities = ["Toutes", "Nice", "Mahagi", "Aru", "Djugu", "Irumu", "Mambasa"];
-
-// Mapping des icônes basé sur l'ID de l'équipement
-const amenityIcons: Record<string, React.ReactNode> = {
-  wifi: <Wifi className="w-4 h-4" />,
-  parking: <Car className="w-4 h-4" />,
-  restaurant: <Coffee className="w-4 h-4" />,
-};
 
 export default function HotelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("Toutes");
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [sortBy, setSortBy] = useState("rating");
-
-  // CORRECTION : On stocke les IDs (string), pas les objets complets
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -62,11 +44,9 @@ export default function HotelsPage() {
     const matchesPrice =
       hotel.price >= priceRange[0] && hotel.price <= priceRange[1];
 
-    // CORRECTION : Vérification si l'hôtel possède TOUS les équipements sélectionnés
     const matchesAmenities =
       selectedAmenities.length === 0 ||
       selectedAmenities.every((id) => hotel.amenities.includes(id as any));
-    // Note: 'as any' ou un cast est utilisé ici selon si hotel.amenities est string[] ou Amenity[]
 
     return matchesSearch && matchesCity && matchesPrice && matchesAmenities;
   }).sort((a, b) => {
@@ -86,121 +66,165 @@ export default function HotelsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 bg-background">
-        {/* Hero Section */}
-        <section className="py-12 md:py-16">
-          <div className="mx-auto px-4 md:px-6 container">
-            <div className="space-y-4 mx-auto max-w-2xl text-center">
-              <h1 className="font-serif font-bold text-foreground text-3xl md:text-4xl">
-                Trouvez Votre Hôtel Idéal
-              </h1>
-              <p className="text-muted-foreground">
-                Explorez notre sélection d&apos;hôtels dans toute la province de
-                l&apos;Ituri
-              </p>
+    <div className="flex flex-col min-h-screen bg-background">
+      <main className="flex-1 w-full">
+        {/* HERO SECTION - Optimized Responsive */}
+        <section className="relative min-h-[45vh] md:min-h-[50vh] flex items-center justify-center overflow-hidden py-16 md:py-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+            style={{
+              backgroundImage: "url('/room.jpg')",
+            }}
+          />
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-[1px]" />
 
-              <div className="flex sm:flex-row flex-col justify-center items-center gap-3 mt-6">
-                <div className="relative flex-1 w-full">
-                  <Search className="top-1/2 left-4 absolute w-5 h-5 text-muted-foreground -translate-y-1/2" />
+          <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center text-white space-y-6">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl font-bold leading-[1.1] max-w-4xl mx-auto text-balance">
+              Découvrez nos <span className="text-primary">établissements</span>{" "}
+              d&apos;exception
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto text-balance leading-relaxed">
+              Explorez une sélection d&apos;hôtels soigneusement choisis pour
+              vous offrir confort et élégance dans toute la province de
+              l&apos;Ituri.
+            </p>
+          </div>
+        </section>
+
+        {/* RESULTS SECTION & SEARCH */}
+        <section className="py-24 container mx-auto px-6">
+          <div className="flex flex-col gap-12">
+            {/* Header & Search combined */}
+            <div className="space-y-8">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+                <div className="space-y-2">
+                  <h2 className="font-serif text-4xl md:text-5xl font-bold">
+                    Nos sélections
+                  </h2>
+                  <p className="text-muted-foreground text-lg">
+                    Découvrez{" "}
+                    <span className="font-bold text-foreground">
+                      {Math.min(filteredHotels.length, 8)}
+                    </span>{" "}
+                    établissements d&apos;exception sur les{" "}
+                    {filteredHotels.length} disponibles.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
+                    Trier par :
+                  </span>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-48 bg-background border-border rounded-none h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rating">Mieux notés</SelectItem>
+                      <SelectItem value="price-low">Prix croissant</SelectItem>
+                      <SelectItem value="price-high">
+                        Prix décroissant
+                      </SelectItem>
+                      <SelectItem value="reviews">Plus d&apos;avis</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* SEARCH BAR - Moved from top */}
+              <div className="bg-white border border-border p-3 flex items-center gap-3 max-w-4xl">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
-                    placeholder="Rechercher un hôtel..."
-                    className="pl-12 rounded-none h-12"
+                    placeholder="Rechercher un hôtel, une destination..."
+                    className="pl-12 bg-transparent border-none text-foreground placeholder:text-muted-foreground h-12 focus-visible:ring-0 text-lg"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Select value={selectedCity} onValueChange={setSelectedCity}>
-                  <SelectTrigger className="relative pl-12 rounded-none w-full sm:w-50 h-12">
-                    <MapPin className="top-1/2 left-4 absolute w-5 h-5 text-muted-foreground -translate-y-1/2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Hotels List */}
-        <section className="py-8 md:py-12">
-          <div className="mx-auto px-4 md:px-6 container">
-            <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-4 mb-8">
-              <p className="text-muted-foreground">
-                <span className="font-semibold text-foreground">
-                  {filteredHotels.length}
-                </span>{" "}
-                hôtels trouvés
-              </p>
-
-              <div className="flex items-center gap-3">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="rounded-none w-44">
-                    <SelectValue placeholder="Trier par" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="rating">Mieux notés</SelectItem>
-                    <SelectItem value="price-low">Prix croissant</SelectItem>
-                    <SelectItem value="price-high">Prix décroissant</SelectItem>
-                    <SelectItem value="reviews">Plus d&apos;avis</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="h-8 w-[1px] bg-border hidden md:block" />
 
                 <Sheet open={open} onOpenChange={setOpen}>
                   <SheetTrigger asChild>
-                    <Button variant="outline" className="rounded-none">
-                      <SlidersHorizontal className="mr-2 w-4 h-4" />
-                      Filtres
+                    <Button
+                      variant="ghost"
+                      className="h-12 px-6 flex items-center gap-2 hover:bg-muted font-semibold"
+                    >
+                      <SlidersHorizontal className="w-5 h-5 text-primary" />
+                      <span className="hidden sm:inline hover:text-primary">
+                        Filtres
+                      </span>
                     </Button>
                   </SheetTrigger>
-                  <SheetContent className="flex flex-col p-0 h-full">
-                    <div className="space-y-2 px-6 py-5 border-b">
+                  <SheetContent className="flex flex-col p-0 h-full bg-background border-l border-border w-full sm:max-w-md">
+                    <div className="space-y-2 px-6 py-2 border-b border-border">
                       <SheetHeader>
-                        <SheetTitle className="font-semibold text-xl">
-                          Filtres
+                        <SheetTitle className="font-serif text-2xl">
+                          Affiner la recherche
                         </SheetTitle>
                         <SheetDescription>
-                          Personnalisez votre recherche
+                          Personnalisez vos critères pour trouver le séjour
+                          parfait.
                         </SheetDescription>
                       </SheetHeader>
-                      <p className="font-bold text-primary text-xl">
-                        {filteredHotels.length} hôtel
-                        {filteredHotels.length > 1 ? "s" : ""} trouvé
-                        {filteredHotels.length > 1 ? "s" : ""}
-                      </p>
                     </div>
 
-                    <div className="flex-1 space-y-10 px-6 py-6 overflow-y-auto">
-                      {/* Budget Slider */}
-                      <div className="space-y-5">
-                        <div>
-                          <h4 className="font-semibold text-base">Budget</h4>
-                          <p className="text-muted-foreground text-sm">
-                            ${priceRange[0]} — ${priceRange[1]} / nuit
-                          </p>
+                    <div className="flex-1 space-y-12 px-8 py-2 overflow-y-auto">
+                      {/* Destination / Ville */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-bold uppercase tracking-widest text-primary">
+                          Destination
+                        </h4>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                          <Select
+                            value={selectedCity}
+                            onValueChange={setSelectedCity}
+                          >
+                            <SelectTrigger className="pl-10 bg-muted/50 border-border h-14 focus:ring-primary">
+                              <SelectValue placeholder="Choisir une ville" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {cities.map((city) => (
+                                <SelectItem key={city} value={city}>
+                                  {city}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {/* Budget */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-bold uppercase tracking-widest text-primary">
+                            Budget par nuit
+                          </h4>
+                          <span className="text-lg font-bold">
+                            ${priceRange[0]} — ${priceRange[1]}
+                          </span>
                         </div>
                         <Slider
                           value={priceRange}
                           onValueChange={setPriceRange}
                           max={500}
                           step={10}
+                          className="py-4"
                         />
                       </div>
 
-                      {/* Amenities Checkboxes */}
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-base">Équipements</h4>
-                        <div className="space-y-3">
+                      {/* Amenities */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-bold uppercase tracking-widest text-primary">
+                          Équipements
+                        </h4>
+                        <div className="grid grid-cols-1 gap-2">
                           {[
-                            { id: "wifi", label: "WiFi" },
-                            { id: "parking", label: "Parking" },
-                            { id: "restaurant", label: "Restaurant" },
+                            { id: "wifi", label: "WiFi Haut débit" },
+                            { id: "parking", label: "Parking Sécurisé" },
+                            { id: "restaurant", label: "Restauration" },
                           ].map((amenity) => {
                             const active = selectedAmenities.includes(
                               amenity.id,
@@ -208,85 +232,84 @@ export default function HotelsPage() {
                             return (
                               <label
                                 key={amenity.id}
-                                className={`flex items-center justify-between px-2 py-2 rounded-lg cursor-pointer transition ${active ? "bg-muted/60" : "hover:bg-muted/40"}`}
+                                className={`flex items-center justify-between p-3 cursor-pointer transition border ${active ? "bg-primary/10 border-primary text-primary" : "bg-muted/30 border-transparent hover:bg-muted/50"}`}
                               >
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-4">
                                   <Checkbox
                                     checked={active}
                                     onCheckedChange={() =>
                                       toggleAmenity(amenity.id)
                                     }
                                   />
-                                  <span className="text-sm">
+                                  <span className="font-medium">
                                     {amenity.label}
                                   </span>
                                 </div>
-                                {active && (
-                                  <span className="font-medium text-primary text-xs">
-                                    Actif
-                                  </span>
-                                )}
                               </label>
                             );
                           })}
                         </div>
                       </div>
-
-                      <button
-                        onClick={() => {
-                          setPriceRange([0, 150]);
-                          setSelectedAmenities([]);
-                        }}
-                        className="text-muted-foreground hover:text-foreground text-sm text-left transition"
-                      >
-                        Réinitialiser les filtres
-                      </button>
                     </div>
 
-                    <div className="p-5 border-t">
+                    <div className="px-8 py-4 border-t border-border bg-muted/20">
                       <Button
-                        className="rounded-full w-full h-12 text-base"
+                        className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/80 text-lg font-bold"
                         onClick={() => setOpen(false)}
                       >
-                        Appliquer les filtres
+                        Voir les résultats
                       </Button>
+                      <button
+                        onClick={() => {
+                          setPriceRange([0, 500]);
+                          setSelectedAmenities([]);
+                          setSelectedCity("Toutes");
+                        }}
+                        className="w-full mt-6 text-sm text-muted-foreground hover:text-foreground transition underline underline-offset-4"
+                      >
+                        Réinitialiser tous les filtres
+                      </button>
                     </div>
                   </SheetContent>
                 </Sheet>
               </div>
             </div>
 
-            {/* Hotels Grid */}
+            {/* Grid Limited to 8 results */}
             {filteredHotels.length > 0 ? (
-              <div className="gap-6 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredHotels.slice(0, 8).map((hotel) => (
                   <HotelCard key={`${hotel.id}-${hotel.name}`} hotel={hotel} />
                 ))}
               </div>
             ) : (
-              <Card className="rounded-3xl">
-                <CardContent className="py-16 text-center">
-                  <Search className="mx-auto mb-4 w-12 h-12 text-muted-foreground" />
-                  <h3 className="mb-2 font-serif font-semibold text-xl">
-                    Aucun hôtel trouvé
+              <div className="bg-muted/30 border border-borderl p-20 text-center space-y-6">
+                <div className="w-20 h-20 bg-muted flex items-center justify-center mx-auto">
+                  <Search className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-serif text-2xl font-bold">
+                    Aucun résultat trouvé
                   </h3>
-                  <p className="mb-4 text-muted-foreground">
-                    Essayez de modifier vos critères de recherche
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    Nous n&apos;avons trouvé aucun établissement correspondant à
+                    vos critères actuels. Essayez d&apos;élargir votre
+                    recherche.
                   </p>
-                  <Button
-                    variant="outline"
-                    className="rounded-full"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSelectedCity("Toutes");
-                      setPriceRange([0, 150]);
-                      setSelectedAmenities([]);
-                    }}
-                  >
-                    Réinitialiser les filtres
-                  </Button>
-                </CardContent>
-              </Card>
+                </div>
+                <Button
+                  variant="outline"
+                  className="border-primary text-primary hover:bg-primary/ px-8"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCity("Toutes");
+                    setPriceRange([0, 500]);
+                    setSelectedAmenities([]);
+                  }}
+                >
+                  Réinitialiser les filtres
+                </Button>
+              </div>
             )}
           </div>
         </section>

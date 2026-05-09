@@ -71,7 +71,7 @@ const adminMenuItems = [
   { href: "/dashboard/admin/chambres", icon: BedDouble, label: "Gestion Chambres"},
   { href: "/dashboard/admin/reservations", icon: CalendarDays, label: "Gestion Réservations" },
   { href: "/dashboard/admin/paiements", icon: CreditCard, label: "Gestion Paiements" },
-  // { href: "/dashboard/admin/avis", icon: Star, label: "Gestion Avis" },
+  { href: "/dashboard/admin/avis", icon: Star, label: "Gestion Avis" },
   { href: "/dashboard/admin/abonnements", icon: ArrowLeftRight, label: "Gestion Transactions" },
   {href: "/dashboard/admin/visiteurs", icon: Users, label: "Gestion Visiteurs"},
   { href: "/dashboard/admin/utilisateurs", icon: User, label: "Gestion Utilisateurs" },

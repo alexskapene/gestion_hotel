@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Lock, Mail, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +20,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -27,14 +29,33 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    // Simulation d'une connexion admin (sans backend pour l'instant)
-    setTimeout(() => {
-      console.log("Admin Login attempt:", formData);
-      setIsLoading(false);
-      // Redirection vers le dashboard admin (qui reste à créer ou améliorer)
+    try {
+      console.log("Tentative de connexion Admin avec:", formData.email);
+      
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        console.error("Login failed:", result.error);
+        setError("Identifiants incorrects. Veuillez réessayer.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Si réussi, on redirige vers le dashboard admin
+      // Le middleware reconnaîtra maintenant le rôle ADMIN
       router.push("/dashboard/admin");
-    }, 1500);
+      router.refresh();
+    } catch (error) {
+      console.error("An error occurred during login:", error);
+      setError("Une erreur inattendue est survenue.");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,6 +88,11 @@ export default function AdminLoginPage() {
           </CardHeader>
 
           <CardContent className="pb-10 pt-4">
+            {error && (
+              <div className="mb-6 p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm animate-shake">
+                {error}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-white/80 font-medium ml-1">Email professionnel</Label>

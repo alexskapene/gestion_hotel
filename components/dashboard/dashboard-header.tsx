@@ -46,7 +46,7 @@ export function DashboardHeader({
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full relative"
+              className="rounded-full relative hover:text-white hover:bg-primary"
             >
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
@@ -64,11 +64,15 @@ export function DashboardHeader({
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="rounded-full gap-2 px-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="w-4 h-4 text-primary" />
+            <Button
+              variant="ghost"
+              className="group rounded-full gap-2 px-3 hover:text-white hover:bg-primary transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
+                <User className="w-4 h-4 text-primary group-hover:text-white transition-colors" />
               </div>
-              <span className="hidden md:inline text-sm font-medium">
+
+              <span className="hidden md:inline text-sm font-medium transition-colors">
                 {userName}
               </span>
             </Button>
@@ -79,7 +83,7 @@ export function DashboardHeader({
             <DropdownMenuItem asChild>
               <Link
                 href={`/dashboard/${userType}/profile`}
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-primary hover:text-white transition-colors"
               >
                 <User className="w-4 h-4 mr-2" />
                 Profil
@@ -88,7 +92,7 @@ export function DashboardHeader({
             <DropdownMenuItem asChild>
               <Link
                 href={`/dashboard/${userType}/settings`}
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-primary hover:text-white transition-colors"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Paramètres
@@ -99,7 +103,7 @@ export function DashboardHeader({
               asChild
               className="text-destructive focus:text-destructive"
             >
-              <Link href="/auth/login" className="cursor-pointer">
+              <Link href="/auth/login" className="cursor-pointer hover:bg-primary hover:text-white transition-colors">
                 <LogOut className="w-4 h-4 mr-2" />
                 Déconnexion
               </Link>

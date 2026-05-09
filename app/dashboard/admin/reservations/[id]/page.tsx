@@ -4,16 +4,17 @@ import { use } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
-  Calendar, 
-  User, 
-  Hotel, 
-  BedDouble, 
-  CreditCard, 
-  MapPin, 
-  Phone, 
+import {
+  ArrowLeft,
+  Calendar,
+  User,
+  Hotel,
+  BedDouble,
+  CreditCard,
+  MapPin,
+  Phone,
   Mail,
+  Users,
   Clock,
   Printer,
   Download,
@@ -31,7 +32,9 @@ const mockReservationDetails = {
   checkIn: "2024-05-15",
   checkOut: "2024-05-20",
   nights: 5,
+  guests: 3,
   totalPrice: 750,
+  paidAmount: 750,
   client: {
     name: "Alice Johnson",
     email: "alice.j@example.com",
@@ -121,32 +124,47 @@ export default function ReservationDetailsPage({ params }: { params: Promise<{ i
                     <p className="text-xs text-muted-foreground">Avant 11:00</p>
                   </div>
                 </div>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                   <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-2">Hébergement</p>
-                   <div className="flex items-start gap-3">
-                     <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
-                       <BedDouble className="w-5 h-5" />
-                     </div>
-                     <div>
-                       <p className="font-bold">{mockReservationDetails.room.title}</p>
-                       <p className="text-sm text-muted-foreground">Chambre {mockReservationDetails.room.number} • {mockReservationDetails.room.category}</p>
-                     </div>
-                   </div>
-                </div>
-                <div>
-                   <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-2">Établissement</p>
-                   <div className="flex items-start gap-3">
-                     <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
-                       <Hotel className="w-5 h-5" />
-                     </div>
-                     <div>
-                       <p className="font-bold">{mockReservationDetails.hotel.name}</p>
-                       <p className="text-xs text-muted-foreground line-clamp-1">{mockReservationDetails.hotel.address}</p>
-                     </div>
-                   </div>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-muted/30 border border-border">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Voyageurs</p>
+                      <p className="text-lg font-bold flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" /> {mockReservationDetails.guests}
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-muted/30 border border-border">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Montant Payé</p>
+                      <p className="text-lg font-bold flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-green-600" /> {mockReservationDetails.paidAmount}$
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-2">Hébergement</p>
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
+                        <BedDouble className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold">{mockReservationDetails.room.title}</p>
+                        <p className="text-sm text-muted-foreground">Chambre {mockReservationDetails.room.number} • {mockReservationDetails.room.category}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-2">Établissement</p>
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
+                        <Hotel className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold">{mockReservationDetails.hotel.name}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{mockReservationDetails.hotel.address}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>

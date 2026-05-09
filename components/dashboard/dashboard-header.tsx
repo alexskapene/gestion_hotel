@@ -26,7 +26,7 @@ export function DashboardHeader({
   onMenuClick,
 }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-6 bg-card/95 backdrop-blur border-b border-border">
+    <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 md:px-6 bg-card/95 backdrop-blur border-b border-border lg:ml-72 transition-all">
       <div className="flex items-center gap-4">
         <button
           className="lg:hidden p-2 rounded-full hover:bg-muted"
@@ -52,7 +52,7 @@ export function DashboardHeader({
               <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-80 z-[100] shadow-2xl border-border bg-card">
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="p-4 text-center text-sm text-muted-foreground">
@@ -73,7 +73,7 @@ export function DashboardHeader({
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 z-[100] shadow-2xl border-border bg-card">
             <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

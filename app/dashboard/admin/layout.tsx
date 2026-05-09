@@ -21,7 +21,7 @@ export default function AdminDashboardLayout({
       />
       <div className="flex-1 flex flex-col min-h-screen">
         <DashboardHeader
-          title="Administration Zua Place"
+          title="Administration"
           userName="Administrateur"
           userType="admin"
           onMenuClick={() => setSidebarOpen(true)}

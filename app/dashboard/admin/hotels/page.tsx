@@ -20,13 +20,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  Search, 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
   Filter,
   MapPin,
   Star,
@@ -101,8 +101,8 @@ export default function HotelsPage() {
       <div className="flex flex-col md:flex-row gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Rechercher par nom, ville, type..." 
+          <Input
+            placeholder="Rechercher par nom, ville, type..."
             className="pl-10 h-11 bg-muted/20 border-border/50 focus:bg-background transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -185,19 +185,19 @@ export default function HotelsPage() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild className="cursor-pointer py-2.5">
                         <Link href={`/dashboard/admin/hotels/${hotel.id}`} className="flex items-center">
-                          <Eye className="w-4 h-4 mr-3 text-muted-foreground" /> 
+                          <Eye className="w-4 h-4 mr-3 text-muted-foreground" />
                           Voir la fiche complète
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className="cursor-pointer py-2.5">
                         <Link href={`/dashboard/admin/hotels/${hotel.id}/edit`} className="flex items-center">
-                          <Edit className="w-4 h-4 mr-3 text-muted-foreground" /> 
+                          <Edit className="w-4 h-4 mr-3 text-muted-foreground" />
                           Modifier l&apos;établissement
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer py-2.5">
-                        <Trash2 className="w-4 h-4 mr-3" /> 
+                        <Trash2 className="w-4 h-4 mr-3" />
                         Supprimer l&apos;hôtel
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -207,7 +207,7 @@ export default function HotelsPage() {
             ))}
           </TableBody>
         </Table>
-        
+
         {/* Pied de tableau avec pagination */}
         <div className="p-4 border-t border-border flex flex-col sm:flex-row items-center justify-between bg-muted/10 gap-4">
           <div className="text-xs text-muted-foreground font-medium">

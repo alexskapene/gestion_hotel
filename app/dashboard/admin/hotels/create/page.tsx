@@ -95,27 +95,25 @@ export default function CreateHotelPage() {
       {/* Stepper Horizontal en haut */}
       <div className="relative px-4">
         <div className="absolute top-5 left-0 w-full h-0.5 bg-muted -z-0 hidden md:block" />
-        <div 
-          className="absolute top-5 left-0 h-0.5 bg-primary -z-0 transition-all duration-500 hidden md:block" 
+        <div
+          className="absolute top-5 left-0 h-0.5 bg-primary -z-0 transition-all duration-500 hidden md:block"
           style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
         />
-        
+
         <div className="relative flex justify-between items-start">
           {STEPS.map((step) => (
             <div key={step.id} className="flex flex-col items-center group">
-              <div 
-                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative z-10 ${
-                  currentStep >= step.id 
-                    ? "bg-primary border-primary text-white shadow-xl shadow-primary/20 scale-110" 
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative z-10 ${currentStep >= step.id
+                    ? "bg-primary border-primary text-white shadow-xl shadow-primary/20 scale-110"
                     : "bg-background border-muted text-muted-foreground"
-                }`}
+                  }`}
               >
                 {currentStep > step.id ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
               </div>
               <div className="mt-3 text-center hidden md:block">
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${
-                  currentStep >= step.id ? "text-primary" : "text-muted-foreground/60"
-                }`}>
+                <p className={`text-[10px] font-bold uppercase tracking-widest ${currentStep >= step.id ? "text-primary" : "text-muted-foreground/60"
+                  }`}>
                   {step.title}
                 </p>
               </div>
@@ -142,9 +140,9 @@ export default function CreateHotelPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Nom de l&apos;établissement</Label>
-                      <Input 
-                        id="name" 
-                        placeholder="Ex: Zua Palace Kinshasa" 
+                      <Input
+                        id="name"
+                        placeholder="Ex: Zua Palace Kinshasa"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
@@ -169,7 +167,7 @@ export default function CreateHotelPage() {
                       </Select>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="stars">Nombre d&apos;étoiles</Label>
@@ -203,9 +201,9 @@ export default function CreateHotelPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="description">Description détaillée</Label>
-                    <Textarea 
-                      id="description" 
-                      placeholder="Décrivez les atouts de votre établissement..." 
+                    <Textarea
+                      id="description"
+                      placeholder="Décrivez les atouts de votre établissement..."
                       className="min-h-[150px] resize-none"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -224,9 +222,9 @@ export default function CreateHotelPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="city">Ville</Label>
-                      <Input 
-                        id="city" 
-                        placeholder="Ex: Kinshasa" 
+                      <Input
+                        id="city"
+                        placeholder="Ex: Kinshasa"
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                         required
@@ -235,9 +233,9 @@ export default function CreateHotelPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Adresse complète</Label>
-                    <Textarea 
-                      id="address" 
-                      placeholder="Ex: 45 Avenue Colonel Mondjiba, Gombe" 
+                    <Textarea
+                      id="address"
+                      placeholder="Ex: 45 Avenue Colonel Mondjiba, Gombe"
                       className="resize-none"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -253,10 +251,10 @@ export default function CreateHotelPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="email">Email professionnel</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder="contact@hotel.com" 
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="contact@hotel.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required
@@ -264,9 +262,9 @@ export default function CreateHotelPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Téléphone</Label>
-                      <Input 
-                        id="phone" 
-                        placeholder="+243 81 000 0000" 
+                      <Input
+                        id="phone"
+                        placeholder="+243 81 000 0000"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       />
@@ -275,18 +273,18 @@ export default function CreateHotelPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="whatsapp">WhatsApp</Label>
-                      <Input 
-                        id="whatsapp" 
-                        placeholder="+243 81 000 0000" 
+                      <Input
+                        id="whatsapp"
+                        placeholder="+243 81 000 0000"
                         value={formData.whatsapp}
                         onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="website">Site Web (Optionnel)</Label>
-                      <Input 
-                        id="website" 
-                        placeholder="https://www.votrehotel.com" 
+                      <Input
+                        id="website"
+                        placeholder="https://www.votrehotel.com"
                         value={formData.website}
                         onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                       />
@@ -301,18 +299,18 @@ export default function CreateHotelPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="checkIn">Heure de Check-in</Label>
-                      <Input 
-                        id="checkIn" 
-                        type="time" 
+                      <Input
+                        id="checkIn"
+                        type="time"
                         value={formData.checkInTime}
                         onChange={(e) => setFormData({ ...formData, checkInTime: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="checkOut">Heure de Check-out</Label>
-                      <Input 
-                        id="checkOut" 
-                        type="time" 
+                      <Input
+                        id="checkOut"
+                        type="time"
                         value={formData.checkOutTime}
                         onChange={(e) => setFormData({ ...formData, checkOutTime: e.target.value })}
                       />
@@ -320,9 +318,9 @@ export default function CreateHotelPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="cancellation">Politique d&apos;annulation</Label>
-                    <Textarea 
-                      id="cancellation" 
-                      placeholder="Ex: Annulation gratuite jusqu'à 24h avant l'arrivée..." 
+                    <Textarea
+                      id="cancellation"
+                      placeholder="Ex: Annulation gratuite jusqu'à 24h avant l'arrivée..."
                       className="min-h-[100px] resize-none"
                       value={formData.cancellationPolicy}
                       onChange={(e) => setFormData({ ...formData, cancellationPolicy: e.target.value })}
@@ -361,9 +359,9 @@ export default function CreateHotelPage() {
             </CardContent>
 
             <CardFooter className="bg-muted/10 p-6 flex justify-between items-center border-t border-border mt-8">
-              <Button 
-                type="button" 
-                variant="ghost" 
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={prevStep}
                 disabled={currentStep === 1}
                 className="gap-2"
@@ -372,15 +370,15 @@ export default function CreateHotelPage() {
               </Button>
 
               {currentStep < STEPS.length ? (
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   onClick={nextStep}
                   className="bg-primary hover:bg-primary/90 gap-2 px-8 h-11"
                 >
                   Continuer <ArrowRight className="w-4 h-4" />
                 </Button>
               ) : (
-                <Button 
+                <Button
                   type="submit"
                   className="bg-primary hover:bg-primary/90 gap-2 px-8 h-11 shadow-lg shadow-primary/20"
                 >

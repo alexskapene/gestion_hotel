@@ -104,7 +104,7 @@ export default function RoomsPage() {
       </div>
 
       {/* Barre de recherche et filtres */}
-      <div className="flex flex-col md:flex-row gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 bg-card p-4 border border-border shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -121,7 +121,7 @@ export default function RoomsPage() {
       </div>
 
       {/* Liste des Chambres */}
-      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+      <div className="bg-card border border-border shadow-sm overflow-hidden">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="hover:bg-transparent">

@@ -16,11 +16,11 @@ import {
   History,
   X,
   Star,
-  DollarSign,
   Users,
   BedDouble,
   CreditCard,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Tags
 } from "lucide-react";
 import Image from "next/image";
 
@@ -67,11 +67,11 @@ const hotelMenuItems = [
 const adminMenuItems = [
   { href: "/dashboard/admin", icon: LayoutDashboard, label: "Tableau de Bord" },
   { href: "/dashboard/admin/hotels", icon: Hotel, label: "Gestion Hôtels" },
+  { href: "/dashboard/admin/chambres/categories", icon: Tags, label: "Catégories Chambres"},
   { href: "/dashboard/admin/chambres", icon: BedDouble, label: "Gestion Chambres"},
-  { href: "/dashboard/admin/clients", icon: User, label: "Gestion Clients" },
   { href: "/dashboard/admin/reservations", icon: CalendarDays, label: "Gestion Réservations" },
-    { href: "/dashboard/admin/paiements", icon: CreditCard, label: "Gestion Paiements" },
-  { href: "/dashboard/admin/avis", icon: Star, label: "Gestion Avis" },
+  { href: "/dashboard/admin/paiements", icon: CreditCard, label: "Gestion Paiements" },
+  // { href: "/dashboard/admin/avis", icon: Star, label: "Gestion Avis" },
   { href: "/dashboard/admin/abonnements", icon: ArrowLeftRight, label: "Gestion Transactions" },
   {href: "/dashboard/admin/visiteurs", icon: Users, label: "Gestion Visiteurs"},
   { href: "/dashboard/admin/utilisateurs", icon: User, label: "Gestion Utilisateurs" },

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,10 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
 enum Role {
   ADMIN
-  HOTEL
+  HOTEL_OWNER
   CLIENT
+}
+
+enum HotelType {
+  HOTEL
+  MOTEL
+  RESORT
+  APARTMENT
+  VILLA
+  HOSTEL
+  LODGE
+  GUEST_HOUSE
 }
 
 enum BookingStatus {
@@ -36,155 +48,342 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+//////////////////////////////////////////////////////
+// USERS
+//////////////////////////////////////////////////////
+
 model User {
-  id        String   @id @default(cuid())
-  username  String?  @unique
-  email     String   @unique
-  password  String
-  role      Role     @default(CLIENT)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  username    String?  @unique
+  email       String   @unique
+  password    String
+  phone       String?
+  avatar      String?
+  role        Role     @default(CLIENT)
+
+  isVerified  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  client Client?
-  hotel  Hotel?
-}
-
-model Client {
-  id        String   @id @default(cuid())
-  name      String?
-  phone     String?
-  address   String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  userId       String        @unique
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hotels       Hotel[]
   reservations Reservation[]
+  reviews      Review[]
 }
+
+//////////////////////////////////////////////////////
+// HOTELS
+//////////////////////////////////////////////////////
 
 model Hotel {
-  id          String   @id @default(cuid())
-  name        String
-  description String?  @db.Text
-  address     String
-  city        String
-  stars       Int      @default(0)
-  rating      Float    @default(0)
-  reviews     Int      @default(0)
-  images      Json? // Array of URLs
-  amenities   Json? // Array of amenities
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(cuid())
 
-  // Relations
-  userId      String             @unique
-  owner       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  rooms       Chambre[]
-  categories  CategorieChambre[]
-  abonnements Abonnement[]
+  name              String
+  slug              String   @unique
+  description       String?  @db.Text
+  shortDescription  String?
+
+  hotelType         HotelType
+  stars             Int      @default(0)
+
+  email             String?
+  phone             String?
+  whatsapp          String?
+
+  website           String?
+
+  country           String
+  city              String
+  address           String   @db.Text
+
+  latitude          Float?
+  longitude         Float?
+
+  checkInTime       String?
+  checkOutTime      String?
+
+  cancellationPolicy String? @db.Text
+
+  logo              String?
+  coverImage        String?
+
+  averageRating     Float    @default(0)
+  reviewCount       Int      @default(0)
+
+  isFeatured        Boolean  @default(false)
+  isVerified        Boolean  @default(false)
+  isActive          Boolean  @default(true)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  ownerId           String
+  owner             User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  rooms             Room[]
+  images            HotelImage[]
+  amenities         HotelAmenity[]
+  reviews           Review[]
+  subscriptions     Subscription[]
+  roomCategories    RoomCategory[]
 }
 
-model CategorieChambre {
-  id          String   @id @default(cuid())
-  name        String
-  description String?  @db.Text
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+//////////////////////////////////////////////////////
+// HOTEL IMAGES
+//////////////////////////////////////////////////////
 
-  // Relations
-  hotelId String
-  hotel   Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
-  rooms   Chambre[]
-}
-
-model Chambre {
-  id          String     @id @default(cuid())
-  number      String
-  price       Float
-  capacity    Int
-  description String?    @db.Text
-  images      Json?
-  amenities   Json?
-  status      RoomStatus @default(AVAILABLE)
-  isActive    Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  // Relations
-  hotelId      String
-  hotel        Hotel            @relation(fields: [hotelId], references: [id], onDelete: Cascade)
-  categoryId   String
-  category     CategorieChambre @relation(fields: [categoryId], references: [id])
-  reservations Reservation[]
-}
-
-model Visiteur {
+model HotelImage {
   id        String   @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  imageUrl  String
 
-  // Relations
-  reservations Reservation[]
+  createdAt DateTime @default(now())
+
+  hotelId   String
+  hotel     Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
 }
+
+//////////////////////////////////////////////////////
+// HOTEL AMENITIES
+//////////////////////////////////////////////////////
+
+model HotelAmenity {
+  id        String @id @default(cuid())
+
+  name      String
+
+  hotelId   String
+  hotel     Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+}
+
+//////////////////////////////////////////////////////
+// ROOM CATEGORY
+//////////////////////////////////////////////////////
+
+model RoomCategory {
+  id          String   @id @default(cuid())
+
+  name        String
+  description String? @db.Text
+
+  createdAt   DateTime @default(now())
+
+  hotelId     String
+  hotel       Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  rooms       Room[]
+}
+
+//////////////////////////////////////////////////////
+// ROOMS
+//////////////////////////////////////////////////////
+
+model Room {
+  id              String   @id @default(cuid())
+
+  roomNumber      String
+  title           String
+
+  description     String? @db.Text
+
+  price           Float
+  capacity        Int
+
+  bedCount        Int?
+  bathroomCount   Int?
+
+  size            Float?
+
+  status          RoomStatus @default(AVAILABLE)
+
+  isActive        Boolean @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  hotelId         String
+  hotel           Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  categoryId      String
+  category        RoomCategory @relation(fields: [categoryId], references: [id])
+
+  images          RoomImage[]
+  amenities       RoomAmenity[]
+
+  reservations    Reservation[]
+}
+
+//////////////////////////////////////////////////////
+// ROOM IMAGES
+//////////////////////////////////////////////////////
+
+model RoomImage {
+  id        String @id @default(cuid())
+
+  imageUrl  String
+
+  roomId    String
+  room      Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+//////////////////////////////////////////////////////
+// ROOM AMENITIES
+//////////////////////////////////////////////////////
+
+model RoomAmenity {
+  id        String @id @default(cuid())
+
+  name      String
+
+  roomId    String
+  room      Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+//////////////////////////////////////////////////////
+// RESERVATIONS
+//////////////////////////////////////////////////////
 
 model Reservation {
-  id         String        @id @default(cuid())
-  checkIn    DateTime
-  checkOut   DateTime
-  totalPrice Float
-  acompte    Float         @default(0)
-  guests     Int           @default(1)
-  status     BookingStatus @default(PENDING)
-  isActive   Boolean       @default(true)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id            String @id @default(cuid())
 
-  // Relations
-  roomId     String
-  room       Chambre   @relation(fields: [roomId], references: [id])
-  clientId   String?
-  client     Client?   @relation(fields: [clientId], references: [id])
-  visiteurId String?
-  visiteur   Visiteur? @relation(fields: [visiteurId], references: [id])
-  payments   Payment[]
+  checkIn       DateTime
+  checkOut      DateTime
+
+  guests        Int @default(1)
+
+  totalPrice    Float
+  paidAmount    Float @default(0)
+
+  status        BookingStatus @default(PENDING)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  roomId        String
+  room          Room @relation(fields: [roomId], references: [id])
+
+  payments      Payment[]
 }
+
+//////////////////////////////////////////////////////
+// PAYMENTS (Reservations)
+//////////////////////////////////////////////////////
 
 model Payment {
-  id            String        @id @default(cuid())
-  amount        Float
-  method        String? // e.g., Card, Cash, Mobile Money
-  transactionId String?       @unique
-  status        PaymentStatus @default(PENDING)
-  isActive      Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id              String @id @default(cuid())
 
-  // Relations
-  reservationId String
-  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  amount          Float
+
+  paymentMethod   String
+
+  transactionId   String? @unique
+
+  status          PaymentStatus @default(PENDING)
+
+  createdAt       DateTime @default(now())
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  reservationId   String
+  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 }
 
-model Abonnement {
-  id        String    @id @default(cuid())
-  type      String // e.g., Basic, Premium, Enterprise
-  startDate DateTime  @default(now())
-  endDate   DateTime?
-  price     Float?
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+//////////////////////////////////////////////////////
+// REVIEWS
+//////////////////////////////////////////////////////
 
-  // Relations
-  hotelId String
-  hotel   Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+model Review {
+  id          String @id @default(cuid())
+
+  rating      Int
+  comment     String? @db.Text
+
+  createdAt   DateTime @default(now())
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  hotelId     String
+  hotel       Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+}
+
+//////////////////////////////////////////////////////
+// SUBSCRIPTIONS
+//////////////////////////////////////////////////////
+
+model Subscription {
+  id            String @id @default(cuid())
+
+  planName      String
+
+  amount        Float
+
+  startDate     DateTime @default(now())
+  endDate       DateTime
+
+  status        SubscriptionStatus @default(ACTIVE)
+
+  createdAt     DateTime @default(now())
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  hotelId       String
+  hotel         Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  transactions  SubscriptionTransaction[]
+}
+
+//////////////////////////////////////////////////////
+// SUBSCRIPTION TRANSACTIONS
+//////////////////////////////////////////////////////
+
+model SubscriptionTransaction {
+  id                String @id @default(cuid())
+
+  amount            Float
+
+  transactionId     String? @unique
+
+  paymentMethod     String?
+
+  status            PaymentStatus @default(PENDING)
+
+  createdAt         DateTime @default(now())
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  subscriptionId    String
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 }

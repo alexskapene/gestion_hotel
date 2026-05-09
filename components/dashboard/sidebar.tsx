@@ -15,11 +15,17 @@ import {
   Heart,
   History,
   X,
+  Star,
+  Users,
+  BedDouble,
+  CreditCard,
+  ArrowLeftRight,
+  Tags
 } from "lucide-react";
 import Image from "next/image";
 
 interface SidebarProps {
-  type: "client" | "hotel";
+  type: "client" | "hotel" | "admin";
   isOpen?: boolean;
   onClose?: () => void;
 }
@@ -58,9 +64,26 @@ const hotelMenuItems = [
   { href: "/dashboard/hotel/settings", icon: Settings, label: "Paramètres" },
 ];
 
+const adminMenuItems = [
+  { href: "/dashboard/admin", icon: LayoutDashboard, label: "Tableau de Bord" },
+  { href: "/dashboard/admin/hotels", icon: Hotel, label: "Gestion Hôtels" },
+  { href: "/dashboard/admin/chambres/categories", icon: Tags, label: "Catégories Chambres"},
+  { href: "/dashboard/admin/chambres", icon: BedDouble, label: "Gestion Chambres"},
+  { href: "/dashboard/admin/reservations", icon: CalendarDays, label: "Gestion Réservations" },
+  { href: "/dashboard/admin/paiements", icon: CreditCard, label: "Gestion Paiements" },
+  { href: "/dashboard/admin/avis", icon: Star, label: "Gestion Avis" },
+  { href: "/dashboard/admin/abonnements", icon: ArrowLeftRight, label: "Gestion Transactions" },
+  {href: "/dashboard/admin/visiteurs", icon: Users, label: "Gestion Visiteurs"},
+  { href: "/dashboard/admin/utilisateurs", icon: User, label: "Gestion Utilisateurs" },
+  { href: "/dashboard/admin/parametres", icon: Settings, label: "Paramètres" },
+];
+
 export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const menuItems = type === "client" ? clientMenuItems : hotelMenuItems;
+  const menuItems = 
+    type === "client" ? clientMenuItems : 
+    type === "hotel" ? hotelMenuItems : 
+    adminMenuItems;
 
   return (
     <>

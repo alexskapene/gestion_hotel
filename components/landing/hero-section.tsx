@@ -39,7 +39,7 @@ export function HeroSection() {
             href={`/hotels?city=${searchCity}&date=${checkIn}&guests=${guests}`}
             className="w-full sm:w-auto"
           >
-            <Button className="text-base h-14 px-8 bg-primary text-primary-foreground hover:bg-primary/80 w-full rounded-full transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/20">
+            <Button className="text-base h-14 px-8 bg-primary text-primary-foreground hover:bg-primary/80 w-full transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/20">
               Explorer les hôtels
             </Button>
           </Link>
@@ -47,7 +47,7 @@ export function HeroSection() {
           <Link href="/contact" className="w-full sm:w-auto">
             <Button
               variant="outline"
-              className="text-base h-14 px-8 border-white/20 w-full text-white hover:bg-white/10 rounded-full backdrop-blur-sm transition-all duration-300"
+              className="text-base h-14 px-8 border-white/20 w-full text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
             >
               Nous contacter
             </Button>

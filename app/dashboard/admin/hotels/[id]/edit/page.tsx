@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,13 +31,13 @@ import {
   Globe,
   Mail,
   Phone,
-  Plus,
   Clock,
   ShieldCheck,
   Smartphone,
   Loader2,
   X,
-  Upload
+  Upload,
+  Save
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -50,26 +50,25 @@ const steps = [
   { id: 3, title: "Politiques & Médias", icon: ImageIcon },
 ];
 
-export default function CreateHotelPage() {
+export default function EditHotelPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [owners, setOwners] = useState<any[]>([]);
-  const [isLoadingOwners, setIsLoadingOwners] = useState(true);
 
   // Images state
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [hotelFiles, setHotelFiles] = useState<File[]>([]);
 
   const [formData, setFormData] = useState({
-    // Step 1
     name: "",
     slug: "",
     hotelType: "HOTEL",
     stars: 0,
     description: "",
     ownerId: "",
-    // Step 2
     country: "République Démocratique du Congo",
     city: "",
     address: "",
@@ -77,27 +76,56 @@ export default function CreateHotelPage() {
     phone: "",
     whatsapp: "",
     website: "",
-    // Step 3
     checkInTime: "14:00",
     checkOutTime: "11:00",
     cancellationPolicy: "",
   });
 
-  // Charger les propriétaires potentiels
+  // Charger les données de l'hôtel et les propriétaires
   useEffect(() => {
-    async function fetchOwners() {
+    async function fetchData() {
       try {
-        const res = await fetch("/api/admin/users?role=HOTEL_OWNER");
-        const data = await res.json();
-        if (res.ok) setOwners(data.users);
+        const [ownersRes, hotelRes] = await Promise.all([
+          fetch("/api/admin/users?role=HOTEL_OWNER"),
+          fetch(`/api/admin/hotels/${id}`)
+        ]);
+
+        const ownersData = await ownersRes.json();
+        const hotelData = await hotelRes.json();
+
+        if (ownersRes.ok) setOwners(ownersData.users);
+        
+        if (hotelRes.ok) {
+          setFormData({
+            name: hotelData.name,
+            slug: hotelData.slug,
+            hotelType: hotelData.hotelType,
+            stars: hotelData.stars,
+            description: hotelData.description || "",
+            ownerId: hotelData.ownerId,
+            country: hotelData.country,
+            city: hotelData.city,
+            address: hotelData.address,
+            email: hotelData.email || "",
+            phone: hotelData.phone || "",
+            whatsapp: hotelData.whatsapp || "",
+            website: hotelData.website || "",
+            checkInTime: hotelData.checkInTime || "14:00",
+            checkOutTime: hotelData.checkOutTime || "11:00",
+            cancellationPolicy: hotelData.cancellationPolicy || "",
+          });
+        } else {
+          toast.error("Hôtel introuvable");
+          router.push("/dashboard/admin/hotels");
+        }
       } catch (error) {
-        toast.error("Impossible de charger les propriétaires");
+        toast.error("Erreur de chargement");
       } finally {
-        setIsLoadingOwners(false);
+        setIsLoading(false);
       }
     }
-    fetchOwners();
-  }, []);
+    fetchData();
+  }, [id, router]);
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -131,49 +159,22 @@ export default function CreateHotelPage() {
         toast.error("Maximum 4 images additionnelles autorisées");
         return;
       }
-
-      const validFiles = newFiles.filter(file => {
-        if (file.size > maxFileSize) {
-          toast.error(`${file.name} est trop lourd (> 2Mo)`);
-          return false;
-        }
-        return true;
-      });
-
-      setHotelFiles(prev => [...prev, ...validFiles]);
+      setHotelFiles(prev => [...prev, ...newFiles]);
     }
-  };
-
-  const removeFile = (index: number) => {
-    setHotelFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.ownerId || !formData.city) {
-      toast.error("Veuillez remplir les champs obligatoires");
-      return;
-    }
-
     setIsSubmitting(true);
     try {
-      // NOTE: Dans un cas réel avec des fichiers, on utiliserait FormData
-      // Pour cet exemple, on simule l'envoi (on pourrait convertir en Base64 ou utiliser S3/Cloudinary)
-      
-      const payload = {
-        ...formData,
-        logo: logoFile ? "logo_url_placeholder" : null, // Simulation
-        images: hotelFiles.map(() => "image_url_placeholder"), // Simulation
-      };
-
-      const response = await fetch("/api/admin/hotels", {
-        method: "POST",
+      const response = await fetch(`/api/admin/hotels/${id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        toast.success("Hôtel créé avec succès ! Il est en attente de vérification.");
-        router.push("/dashboard/admin/hotels");
+        toast.success("Hôtel mis à jour avec succès !");
+        router.push(`/dashboard/admin/hotels/${id}`);
       } else {
         const error = await response.json();
         toast.error(error.error || "Une erreur est survenue");
@@ -185,10 +186,36 @@ export default function CreateHotelPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse">Chargement de l&apos;éditeur...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" asChild className="rounded-full">
+            <Link href={`/dashboard/admin/hotels/${id}`}>
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-serif font-bold text-foreground">Modifier l&apos;Hôtel</h1>
+        </div>
+        <div className="flex items-center gap-4">
+           <div className="text-right hidden md:block">
+              <p className="text-xs font-bold uppercase text-muted-foreground">Étape {currentStep} sur 3</p>
+              <p className="text-sm text-primary font-medium">{steps[currentStep-1].title}</p>
+           </div>
+        </div>
+      </div>
+
       {/* Stepper */}
-      <div className="flex flex-col items-center justify-center space-y-4 pt-4">
+      <div className="flex flex-col items-center justify-center space-y-4">
         <div className="flex items-center w-full max-w-3xl justify-between relative px-2">
           <div className="absolute top-1/2 left-0 w-full h-0.5 bg-muted -translate-y-1/2 z-0" />
           <div 
@@ -205,9 +232,6 @@ export default function CreateHotelPage() {
               >
                 {currentStep > step.id ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
               </div>
-              <span className={`text-[10px] font-bold mt-2 uppercase tracking-widest ${currentStep >= step.id ? "text-primary" : "text-muted-foreground"}`}>
-                {step.title}
-              </span>
             </div>
           ))}
         </div>
@@ -216,20 +240,17 @@ export default function CreateHotelPage() {
       <Card className="border-none shadow-2xl bg-card overflow-hidden">
         <div className="h-2 bg-primary w-full" />
         
-        {/* STEP 1: GENERAL INFO */}
         {currentStep === 1 && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-3xl font-serif">Informations Générales</CardTitle>
-              <CardDescription>Définissez l&apos;identité et la catégorie de votre établissement.</CardDescription>
+            <CardHeader>
+              <CardTitle className="text-2xl font-serif">Informations Générales</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nom de l&apos;hôtel <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="name">Nom de l&apos;hôtel</Label>
                   <Input 
                     id="name" 
-                    placeholder="Ex: Zua Palace Kinshasa" 
                     className="h-12"
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
@@ -248,10 +269,10 @@ export default function CreateHotelPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-2">
-                    <Label>Propriétaire <span className="text-destructive">*</span></Label>
+                    <Label>Propriétaire</Label>
                     <Select value={formData.ownerId} onValueChange={(v) => handleInputChange("ownerId", v)}>
                       <SelectTrigger className="h-12">
-                        <SelectValue placeholder={isLoadingOwners ? "Chargement..." : "Choisir un propriétaire"} />
+                        <SelectValue placeholder="Changer le propriétaire" />
                       </SelectTrigger>
                       <SelectContent>
                         {owners.map(owner => (
@@ -266,7 +287,7 @@ export default function CreateHotelPage() {
                     <Label>Type d&apos;établissement</Label>
                     <Select value={formData.hotelType} onValueChange={(v) => handleInputChange("hotelType", v)}>
                       <SelectTrigger className="h-12">
-                        <SelectValue placeholder="Choisir le type" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="HOTEL">Hôtel classique</SelectItem>
@@ -295,12 +316,6 @@ export default function CreateHotelPage() {
                       <Star className={`w-4 h-4 ${formData.stars >= s ? "fill-white" : ""}`} />
                     </Button>
                   ))}
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    className="ml-2" 
-                    onClick={() => handleInputChange("stars", 0)}
-                  >Réinitialiser</Button>
                 </div>
               </div>
 
@@ -308,7 +323,6 @@ export default function CreateHotelPage() {
                 <Label htmlFor="description">Description détaillée</Label>
                 <Textarea 
                   id="description" 
-                  placeholder="Décrivez les services, l'ambiance et l'histoire de l'hôtel..." 
                   className="min-h-[150px] resize-none"
                   value={formData.description}
                   onChange={(e) => handleInputChange("description", e.target.value)}
@@ -318,74 +332,53 @@ export default function CreateHotelPage() {
           </div>
         )}
 
-        {/* STEP 2: LOCATION & CONTACT */}
         {currentStep === 2 && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
             <CardHeader>
-              <CardTitle className="text-3xl font-serif">Localisation & Contact</CardTitle>
-              <CardDescription>Précisez où se situe l&apos;hôtel et comment le contacter directement.</CardDescription>
+              <CardTitle className="text-2xl font-serif">Localisation & Contact</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="country">Pays</Label>
-                  <Input id="country" value={formData.country} className="h-12 bg-muted/30" readOnly />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="city">Ville <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="city">Ville</Label>
                   <Input 
                     id="city" 
-                    placeholder="Ex: Kinshasa, Goma, Lubumbashi..." 
                     className="h-12"
                     value={formData.city}
                     onChange={(e) => handleInputChange("city", e.target.value)}
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">Adresse physique <span className="text-destructive">*</span></Label>
-                <Input 
-                  id="address" 
-                  placeholder="Numéro, Avenue, Quartier..." 
-                  className="h-12"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="address">Adresse physique</Label>
+                  <Input 
+                    id="address" 
+                    className="h-12"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border/50">
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> Email Professionnel</Label>
                     <Input 
-                      placeholder="contact@hotel.com" 
                       className="h-12"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                     />
                  </div>
                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary" /> Téléphone Réception</Label>
+                    <Label className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary" /> Téléphone</Label>
                     <Input 
-                      placeholder="+243 ..." 
                       className="h-12"
                       value={formData.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                     />
                  </div>
                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Smartphone className="w-4 h-4 text-primary" /> WhatsApp Business</Label>
-                    <Input 
-                      placeholder="+243 ..." 
-                      className="h-12"
-                      value={formData.whatsapp}
-                      onChange={(e) => handleInputChange("whatsapp", e.target.value)}
-                    />
-                 </div>
-                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Globe className="w-4 h-4 text-primary" /> Site Web</Label>
                     <Input 
-                      placeholder="https://www.hotel.com" 
                       className="h-12"
                       value={formData.website}
                       onChange={(e) => handleInputChange("website", e.target.value)}
@@ -396,30 +389,27 @@ export default function CreateHotelPage() {
           </div>
         )}
 
-        {/* STEP 3: POLICIES & MEDIA */}
         {currentStep === 3 && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
             <CardHeader>
-              <CardTitle className="text-3xl font-serif">Politiques & Médias</CardTitle>
-              <CardDescription>Images (Logo + 4 max, 2Mo max chacune).</CardDescription>
+              <CardTitle className="text-2xl font-serif">Politiques & Médias</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-2">
-                          <Label className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Check-in</Label>
+                          <Label>Check-in</Label>
                           <Input type="time" className="h-12" value={formData.checkInTime} onChange={(e) => handleInputChange("checkInTime", e.target.value)} />
                        </div>
                        <div className="space-y-2">
-                          <Label className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Check-out</Label>
+                          <Label>Check-out</Label>
                           <Input type="time" className="h-12" value={formData.checkOutTime} onChange={(e) => handleInputChange("checkOutTime", e.target.value)} />
                        </div>
                     </div>
                     <div className="space-y-2">
-                       <Label className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-primary" /> Politique d&apos;annulation</Label>
+                       <Label>Politique d&apos;annulation</Label>
                        <Textarea 
-                         placeholder="Ex: Annulation gratuite jusqu'à 24h avant l'arrivée..." 
                          className="min-h-[100px]"
                          value={formData.cancellationPolicy}
                          onChange={(e) => handleInputChange("cancellationPolicy", e.target.value)}
@@ -428,50 +418,12 @@ export default function CreateHotelPage() {
                  </div>
 
                  <div className="space-y-6">
-                    {/* Logo Upload */}
-                    <div className="space-y-2">
-                      <Label>Logo de l&apos;hôtel (2Mo max)</Label>
-                      <div className="relative group">
-                        <label className={`flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-xl transition-all cursor-pointer ${logoFile ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/30 bg-muted/10'}`}>
-                          {logoFile ? (
-                            <div className="flex items-center gap-3 px-4">
-                              <ImageIcon className="w-6 h-6 text-primary" />
-                              <span className="text-xs font-medium truncate max-w-[150px]">{logoFile.name}</span>
-                              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => { e.preventDefault(); setLogoFile(null); }}>
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <>
-                              <Upload className="w-6 h-6 text-muted-foreground mb-1" />
-                              <span className="text-[10px] uppercase font-bold text-muted-foreground">Téléverser Logo</span>
-                            </>
-                          )}
-                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Gallery Upload */}
-                    <div className="space-y-2">
-                      <Label>Galerie (Max 4 images, 2Mo max chacune)</Label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {hotelFiles.map((file, idx) => (
-                          <div key={idx} className="relative aspect-video rounded-lg border border-border bg-muted/20 flex items-center justify-center p-2 group">
-                             <span className="text-[10px] truncate max-w-full">{file.name}</span>
-                             <button onClick={() => removeFile(idx)} className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                               <X className="w-3 h-3" />
-                             </button>
-                          </div>
-                        ))}
-                        {hotelFiles.length < 4 && (
-                          <label className="aspect-video rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all">
-                            <Plus className="w-5 h-5 text-muted-foreground" />
-                            <span className="text-[10px] font-bold text-muted-foreground mt-1">AJOUTER</span>
-                            <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleFileChange(e, 'images')} />
-                          </label>
-                        )}
-                      </div>
+                    <div className="p-8 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-3 bg-muted/10 opacity-50 cursor-not-allowed">
+                       <ImageIcon className="w-10 h-10 text-muted-foreground" />
+                       <div className="text-center">
+                          <p className="font-bold text-sm text-muted-foreground">Médias non modifiables ici</p>
+                          <p className="text-[10px] text-muted-foreground">La gestion des photos arrive bientôt</p>
+                       </div>
                     </div>
                  </div>
               </div>
@@ -491,7 +443,7 @@ export default function CreateHotelPage() {
           
           {currentStep < steps.length ? (
             <Button onClick={nextStep} className="h-12 px-8 bg-primary hover:bg-primary/90">
-              Continuer <ArrowRight className="w-4 h-4 ml-2" />
+              Suivant <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           ) : (
             <Button 
@@ -499,8 +451,8 @@ export default function CreateHotelPage() {
               disabled={isSubmitting}
               className="h-12 px-10 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
             >
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Enregistrer l&apos;Hôtel <CheckCircle2 className="w-4 h-4 ml-2" />
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+              Mettre à jour l&apos;Hôtel
             </Button>
           )}
         </CardFooter>

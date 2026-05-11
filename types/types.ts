@@ -1,12 +1,17 @@
-export type UserRole = "admin" | "manager" | "client";
+export type UserRole = "ADMIN" | "HOTEL_OWNER" | "CLIENT";
 
 export interface User {
   id: string;
-  name: string;
+  username?: string | null;
   email: string;
+  password?: string;
+  phone?: string | null;
+  avatar?: string | null;
   role: UserRole;
-  avatar?: string;
-  hotelId?: string;
+  isVerified: boolean;
+  isActive: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface Room {

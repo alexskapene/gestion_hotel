@@ -35,7 +35,7 @@ import {
   Loader2
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 
 const STEPS = [
@@ -44,12 +44,14 @@ const STEPS = [
   { id: 3, title: "Médias", description: "Photos de la chambre", icon: ImageIcon },
 ];
 
-export default function CreateRoomPage() {
+export default function EditRoomPage() {
   const router = useRouter();
+  const { id } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [hotels, setHotels] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     roomNumber: "",
     title: "",
@@ -64,21 +66,45 @@ export default function CreateRoomPage() {
     status: "AVAILABLE",
   });
 
-  // Fetch hotels on mount
+  // Fetch initial data (room details and hotels)
   useEffect(() => {
-    async function fetchHotels() {
+    async function fetchData() {
       try {
-        const res = await fetch("/api/admin/hotels");
-        if (res.ok) {
-          const data = await res.json();
-          setHotels(data);
+        const [roomRes, hotelsRes] = await Promise.all([
+          fetch(`/api/admin/rooms/${id}`),
+          fetch("/api/admin/hotels")
+        ]);
+
+        if (roomRes.ok && hotelsRes.ok) {
+          const roomData = await roomRes.json();
+          const hotelsData = await hotelsRes.json();
+          
+          setHotels(hotelsData);
+          setFormData({
+            roomNumber: roomData.roomNumber,
+            title: roomData.title,
+            description: roomData.description || "",
+            price: roomData.price.toString(),
+            capacity: roomData.capacity.toString(),
+            bedCount: (roomData.bedCount || 1).toString(),
+            bathroomCount: (roomData.bathroomCount || 1).toString(),
+            size: (roomData.size || "").toString(),
+            hotelId: roomData.hotelId,
+            categoryId: roomData.categoryId,
+            status: roomData.status,
+          });
+        } else {
+          toast.error("Erreur lors du chargement des données");
+          router.push("/dashboard/admin/chambres");
         }
       } catch (error) {
-        toast.error("Erreur de chargement des hôtels");
+        toast.error("Erreur réseau");
+      } finally {
+        setIsLoading(false);
       }
     }
-    fetchHotels();
-  }, []);
+    fetchData();
+  }, [id, router]);
 
   // Fetch categories when hotelId changes
   useEffect(() => {
@@ -110,10 +136,10 @@ export default function CreateRoomPage() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
-      const response = await fetch("/api/admin/rooms", {
-        method: "POST",
+      const response = await fetch(`/api/admin/rooms/${id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -126,7 +152,7 @@ export default function CreateRoomPage() {
       });
 
       if (response.ok) {
-        toast.success("Chambre ajoutée avec succès !");
+        toast.success("Chambre mise à jour avec succès !");
         router.push("/dashboard/admin/chambres");
       } else {
         const error = await response.json();
@@ -135,9 +161,18 @@ export default function CreateRoomPage() {
     } catch (error) {
       toast.error("Erreur réseau");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <p className="text-muted-foreground font-medium animate-pulse">Chargement de la chambre...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -150,8 +185,8 @@ export default function CreateRoomPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-serif font-bold text-foreground">Ajouter une Chambre</h1>
-            <p className="text-muted-foreground">Créez une nouvelle unité pour l&apos;un de vos établissements.</p>
+            <h1 className="text-3xl font-serif font-bold text-foreground">Modifier la Chambre</h1>
+            <p className="text-muted-foreground">Mettez à jour les informations de l&apos;unité {formData.roomNumber}.</p>
           </div>
         </div>
       </div>
@@ -346,6 +381,20 @@ export default function CreateRoomPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="space-y-2 pt-4">
+                  <Label>Statut de la chambre</Label>
+                  <Select value={formData.status} onValueChange={(val) => setFormData({ ...formData, status: val })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AVAILABLE">Disponible</SelectItem>
+                      <SelectItem value="OCCUPIED">Occupée</SelectItem>
+                      <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
@@ -358,7 +407,7 @@ export default function CreateRoomPage() {
                   </div>
                   <h3 className="text-lg font-serif font-bold">Photos de la chambre</h3>
                   <p className="text-sm text-muted-foreground mt-1 max-w-xs">
-                    Glissez-déposez ou cliquez pour ajouter les photos de l&apos;intérieur. (Max. 5 photos)
+                    Glissez-déposez ou cliquez pour ajouter les photos de l&apos;intérieur.
                   </p>
                 </div>
 
@@ -367,9 +416,9 @@ export default function CreateRoomPage() {
                     <CheckCircle2 className="text-white w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-primary">Prêt à l&apos;emploi</p>
+                    <p className="text-sm font-bold text-primary">Mise à jour en direct</p>
                     <p className="text-xs text-primary/70 leading-relaxed">
-                      Une fois enregistrée, la chambre sera immédiatement visible pour les réservations en ligne selon l&apos;état de disponibilité défini.
+                      Les modifications seront appliquées immédiatement sur le portail de réservation.
                     </p>
                   </div>
                 </div>
@@ -382,7 +431,7 @@ export default function CreateRoomPage() {
               type="button"
               variant="ghost"
               onClick={prevStep}
-              disabled={currentStep === 1 || isLoading}
+              disabled={currentStep === 1 || isSubmitting}
               className="gap-2"
             >
               <ArrowLeft className="w-4 h-4" /> Précédent
@@ -399,11 +448,11 @@ export default function CreateRoomPage() {
             ) : (
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="bg-primary hover:bg-primary/90 gap-2 px-8 h-11 shadow-lg shadow-primary/20"
               >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Créer la chambre
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                Enregistrer les modifications
               </Button>
             )}
           </CardFooter>

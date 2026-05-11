@@ -10,8 +10,18 @@ export const authConfig = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Cette partie ne sera pas exécutée dans le Middleware
-        return null;
+        if (!credentials?.email || !credentials?.password) return null;
+
+        try {
+          const { AuthService } = await import("@/services/auth.service");
+          const user = await AuthService.validateAdminCredentials(
+            credentials.email as string,
+            credentials.password as string
+          );
+          return user;
+        } catch (error) {
+          return null;
+        }
       }
     })
   ],

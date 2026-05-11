@@ -151,11 +151,6 @@ export default function AdminLoginPage() {
           </CardContent>
         </Card>
       </div>
-      
-      {/* Footer copyright */}
-      <div className="absolute bottom-8 z-20 text-white/30 text-xs">
-        © {new Date().getFullYear()} Zua Place Administration • Tous droits réservés
-      </div>
     </div>
   );
 }

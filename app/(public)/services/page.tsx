@@ -186,7 +186,7 @@ export default function ServicesPage() {
               {travelerServices.map((service, index) => (
                 <div
                   key={index}
-                  className="group relative border border-border/50 bg-background/70 p-8 hover:-translate-y-1 transition-all duration-500 shadow-xl"
+                  className="group relative border border-border bg-background/70 p-8 hover:-translate-y-1 transition-all duration-500"
                 >
                   <div className="relative z-10 space-y-6">
                     <div
@@ -235,7 +235,7 @@ export default function ServicesPage() {
 
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               {/* BIG CARD */}
-              <div className="relative overflow-hidden min-h-[550px] border border-border/50 shadow-2xl">
+              <div className="relative overflow-hidden min-h-[550px] border border-border/50">
                 <Image
                   src="/room.jpg"
                   alt="Hotel Dashboard"
@@ -284,7 +284,7 @@ export default function ServicesPage() {
                 {hotelServices.map((service, index) => (
                   <div
                     key={index}
-                    className="group border border-border/50 bg-background p-8 hover:-translate-y-1 transition-all duration-500 shadow-lg hover:shadow-2xl"
+                    className="group border border-border bg-background p-8 hover:-translate-y-1 transition-all duration-500"
                   >
                     <div className="space-y-6">
                       <div
@@ -328,7 +328,7 @@ export default function ServicesPage() {
               {processSteps.map((step, index) => (
                 <div
                   key={index}
-                  className="group relative border border-border/50 bg-background p-8 hover:-translate-y-2 transition-all duration-500 shadow-lg hover:shadow-2xl"
+                  className="group relative border border-border bg-background p-8 hover:-translate-y-2 transition-all duration-500"
                 >
                   {/* BIG BACKGROUND NUMBER (garde effet branding) */}
                   <div className="absolute -top-10 right-4 text-8xl font-bold text-muted-foreground/10 select-none">

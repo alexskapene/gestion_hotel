@@ -32,8 +32,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { useSession } from "next-auth/react";
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
+  const { data: session } = useSession();
+
+  const user = {
+    username: (session?.user as any)?.username || session?.user?.name || "Administrateur",
+    email: session?.user?.email || "admin@zuaplace.com",
+    role: (session?.user as any)?.role || "ADMIN",
+    createdAt: "10 Janvier 2024" // On pourrait aussi le tirer de la session si ajouté
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -89,32 +99,34 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-6 pb-6 border-b border-border/50">
                        <div className="relative group">
                           <Avatar className="h-24 w-24 border-4 border-primary/20 shadow-lg transition-transform group-hover:scale-105">
-                            <AvatarImage src="" />
-                            <AvatarFallback className="text-2xl font-bold bg-primary/5 text-primary">LM</AvatarFallback>
+                            <AvatarImage src={session?.user?.image || ""} />
+                            <AvatarFallback className="text-2xl font-bold bg-primary/5 text-primary">
+                              {user.username.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
                           </Avatar>
                           <Button size="icon" className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full shadow-lg">
                             <Camera className="w-4 h-4" />
                           </Button>
                        </div>
                        <div>
-                          <h4 className="font-bold text-lg">Laurence 1Mas</h4>
-                          <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Administrateur Principal</p>
-                          <p className="text-xs text-muted-foreground mt-1">Inscrit depuis le 10 Janvier 2024</p>
+                          <h4 className="font-bold text-lg">{user.username}</h4>
+                          <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">{user.role}</p>
+                          <p className="text-xs text-muted-foreground mt-1">Inscrit depuis le {user.createdAt}</p>
                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                        <div className="space-y-2">
                           <Label htmlFor="username">Nom d&apos;utilisateur</Label>
-                          <Input id="username" defaultValue="laurence1Mas" className="h-11" />
+                          <Input id="username" defaultValue={user.username} className="h-11" />
                        </div>
                        <div className="space-y-2">
                           <Label htmlFor="email">Adresse Email</Label>
-                          <Input id="email" type="email" defaultValue="laurence@zua.cd" className="h-11" />
+                          <Input id="email" type="email" defaultValue={user.email} className="h-11" />
                        </div>
                        <div className="space-y-2">
                           <Label htmlFor="phone">Numéro de Téléphone</Label>
-                          <Input id="phone" defaultValue="+243 81 000 0001" className="h-11" />
+                          <Input id="phone" defaultValue={session?.user?.phone || "+243 81 000 0001"} className="h-11" />
                        </div>
                     </div>
                  </CardContent>

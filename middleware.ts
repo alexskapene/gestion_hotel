@@ -19,7 +19,7 @@ export default auth((req) => {
     if (nextUrl.pathname.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", nextUrl))
     }
-    if (nextUrl.pathname.startsWith("/dashboard/hotel") && userRole !== "HOTEL") {
+    if (nextUrl.pathname.startsWith("/dashboard/hotel") && userRole !== "HOTEL_OWNER") {
       return NextResponse.redirect(new URL("/dashboard", nextUrl))
     }
     if (nextUrl.pathname.startsWith("/dashboard/client") && userRole !== "CLIENT") {

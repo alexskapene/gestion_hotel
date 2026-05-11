@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { useSession } from "next-auth/react";
 
 export default function AdminDashboardLayout({
   children,
@@ -11,6 +12,9 @@ export default function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  const userName = (session?.user as any)?.username || session?.user?.name || session?.user?.email || "Administrateur";
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
@@ -22,7 +26,7 @@ export default function AdminDashboardLayout({
       <div className="flex-1 flex flex-col min-h-screen">
         <DashboardHeader
           title="Administration"
-          userName="Administrateur"
+          userName={userName}
           userType="admin"
           onMenuClick={() => setSidebarOpen(true)}
         />

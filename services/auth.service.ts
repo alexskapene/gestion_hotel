@@ -36,9 +36,13 @@ export class AuthService {
         throw new Error("Accès non autorisé : Droits administrateur requis");
       }
 
-      // 4. Vérification si le compte est actif
+      // 4. Vérification si le compte est actif et vérifié
       if (!user.isActive) {
         throw new Error("Votre compte a été suspendu. Veuillez contacter le support.");
+      }
+
+      if (!user.isVerified) {
+        throw new Error("Votre compte n'est pas encore vérifié. Veuillez valider votre email.");
       }
 
       // 5. Comparaison sécurisée du mot de passe

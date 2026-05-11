@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,6 +42,7 @@ export default function RootLayout({
           <AppProvider>
             <main className="flex-1">{children}</main>
             <HotelDetailModal />
+            <Toaster position="top-right" richColors />
           </AppProvider>
         </AuthProvider>
       </body>

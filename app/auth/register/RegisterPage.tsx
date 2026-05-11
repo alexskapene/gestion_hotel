@@ -48,8 +48,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row">
       {/* LEFT IMAGE */}
-      <div
-        className="relative hidden md:flex w-1/2 min-h-screen bg-cover bg-center flex-col"
+      <div className="relative hidden md:flex w-1/2 min-h-screen bg-cover bg-center flex-col"
         style={{ backgroundImage: "url('/room.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/60" />

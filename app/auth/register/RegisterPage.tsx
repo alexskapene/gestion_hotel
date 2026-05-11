@@ -93,7 +93,7 @@ export default function RegisterPage() {
             <CardHeader className="text-center space-y-2">
               <CardTitle className="font-serif text-3xl">
                 Créer un compte
-              </CardTitle>
+              </CardTitle>r'
 
               <CardDescription>Rejoignez Zua Place</CardDescription>
             </CardHeader>

@@ -154,7 +154,7 @@ export default function ServicesPage() {
           <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
 
           <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center text-white space-y-6">
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl font-bold leading-[1.1] max-w-4xl mx-auto text-balance">
+            <h1 className="font-serif text-4xl sm:text-4xl md:text-6xl font-bold leading-[1.1] max-w-4xl mx-auto text-balance">
               Une plateforme pensée pour{" "}
               <span className="text-primary">vos besoins</span>
             </h1>
@@ -172,7 +172,7 @@ export default function ServicesPage() {
 
           <div className="container mx-auto px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center space-y-5 mb-20">
-              <h2 className="font-serif text-4xl md:text-5xl font-bold">
+              <h2 className="font-serif text-3xl md:text-5xl font-bold">
                 Une expérience pensée pour les voyageurs
               </h2>
 
@@ -223,7 +223,7 @@ export default function ServicesPage() {
 
           <div className="container mx-auto px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center space-y-5 mb-20">
-              <h2 className="font-serif text-4xl md:text-5xl font-bold">
+              <h2 className="font-serif text-3xl md:text-5xl font-bold">
                 Des outils puissants pour votre établissement
               </h2>
 
@@ -251,7 +251,7 @@ export default function ServicesPage() {
                       Dashboard Hôtelier
                     </div>
 
-                    <h3 className="font-serif text-4xl font-bold leading-tight">
+                    <h3 className="font-serif text-3xl font-bold leading-tight">
                       Gérez votre activité avec simplicité
                     </h3>
 
@@ -314,7 +314,7 @@ export default function ServicesPage() {
         <section className="py-28 relative">
           <div className="container mx-auto px-6">
             <div className="max-w-3xl mx-auto text-center space-y-5 mb-24">
-              <h2 className="font-serif text-4xl md:text-5xl font-bold">
+              <h2 className="font-serif text-3xl  md:text-5xl font-bold">
                 Comment fonctionne la plateforme
               </h2>
 

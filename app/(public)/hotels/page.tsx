@@ -79,7 +79,7 @@ export default function HotelsPage() {
           <div className="absolute inset-0 bg-black/75 backdrop-blur-[1px]" />
 
           <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center text-white space-y-6">
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl font-bold leading-[1.1] max-w-4xl mx-auto text-balance">
+            <h1 className="font-serif text-4xl sm:text-4xl md:text-6xl font-bold leading-[1.1] max-w-4xl mx-auto text-balance">
               Découvrez nos <span className="text-primary">établissements</span>{" "}
               d&apos;exception
             </h1>

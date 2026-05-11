@@ -166,7 +166,7 @@ export default function ContactPage() {
             <Card className="border border-border bg-background">
               <CardContent className="p-8 space-y-6">
                 <div className="space-y-2">
-                  <h3 className="font-serif text-3xl font-bold">
+                  <h3 className="font-serif text-2xl font-bold">
                     Envoyer un message
                   </h3>
                 </div>

@@ -103,14 +103,14 @@ export default function Header() {
               Hôtels
             </Link>
             <Link
-              href="#features"
+              href="/services"
               className="px-4 py-3 rounded-full text-sm font-medium hover:bg-muted transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Services
             </Link>
             <Link
-              href="#contact"
+              href="/contact"
               className="px-4 py-3 rounded-full text-sm font-medium hover:bg-muted transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >

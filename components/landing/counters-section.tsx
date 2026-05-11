@@ -55,12 +55,12 @@ export function Counters() {
                   </div>
 
                   {/* Number */}
-                  <h3 className="text-xl sm:text-3xl lg:text-4xl font-bold leading-none">
+                  <h3 className="text-3xl sm:text-3xl lg:text-4xl font-bold leading-none">
                     {item.number}
                   </h3>
 
                   {/* Label */}
-                  <p className="text-xs sm:text-sm lg:text-base text-muted-foreground leading-relaxed">
+                  <p className="text-[18px] sm:text-sm lg:text-base text-muted-foreground leading-relaxed">
                     {item.label}
                   </p>
 

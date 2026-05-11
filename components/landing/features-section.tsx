@@ -65,7 +65,7 @@ export function FeaturesSection() {
       </div>
 
       {/* FLOATING CARDS */}
-      <div className="relative z-20 -mt-20 px-6 md:px-20">
+      <div className="relative z-20 -mt-20 px-10 md:px-20">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((item, index) => {
             const Icon = item.icon;

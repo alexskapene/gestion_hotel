@@ -24,7 +24,7 @@ export function HeroSection() {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center text-white flex flex-col items-center justify-center space-y-8">
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] text-balance">
+        <h1 className="font-serif text-5xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] text-balance">
           Trouvez le <span className="text-primary">lieu idéal</span> pour votre
           prochain <span className="text-primary text-italic">séjour</span>.
         </h1>

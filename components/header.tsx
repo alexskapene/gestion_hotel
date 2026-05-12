@@ -103,27 +103,24 @@ export default function Header() {
               Hôtels
             </Link>
             <Link
-              href="#features"
+              href="/services"
               className="px-4 py-3 rounded-full text-sm font-medium hover:bg-muted transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Services
             </Link>
             <Link
-              href="#contact"
+              href="/contact"
               className="px-4 py-3 rounded-full text-sm font-medium hover:bg-muted transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
             </Link>
             <div className="flex flex-col gap-2 pt-4 border-t border-border mt-2">
-              <Button asChild variant="outline" className="rounded-full w-full">
-                <Link href="/auth/login">Connexion Client</Link>
+              <Button asChild variant="outline" className=" w-full">
+                <Link href="/auth/login">Connexion</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-full w-full">
-                <Link href="/auth/login?type=hotel">Connexion Hôtel</Link>
-              </Button>
-              <Button asChild className="rounded-full w-full bg-primary">
+              <Button asChild className="w-full bg-primary">
                 <Link href="/auth/register">{"S'inscrire"}</Link>
               </Button>
             </div>

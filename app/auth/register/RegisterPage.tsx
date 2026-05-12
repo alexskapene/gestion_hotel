@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Hotel, User } from "lucide-react";
+import { Hotel, Loader2, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -18,20 +18,31 @@ import { useState } from "react";
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const defaultTab = searchParams.get("type") === "hotel" ? "hotel" : "client";
+
+  const [activeTab, setActiveTab] = useState<"client" | "hotel">(
+    defaultTab as "client" | "hotel",
+  );
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent, type: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isLoading) return; // bloque double clic
+    if (isLoading) return;
 
     setIsLoading(true);
 
+    // Simulation loading
     await new Promise((r) => setTimeout(r, 1000));
 
-    router.replace(`/onboarding?type=${type}`);
+    // Redirection selon le profil actif
+    if (activeTab === "hotel") {
+      router.replace("/dashboard/hotel");
+    } else {
+      router.replace("/dashboard/client");
+    }
   };
 
   return (
@@ -77,16 +88,23 @@ export default function RegisterPage() {
             </Link>
           </div>
 
-          <Card className="bg-white">
-            <CardHeader className="text-center">
+          <Card className="bg-white border-0 shadow-xl">
+            <CardHeader className="text-center space-y-2">
               <CardTitle className="font-serif text-3xl">
                 Créer un compte
-              </CardTitle>
+              </CardTitle>r'
+
               <CardDescription>Rejoignez Zua Place</CardDescription>
             </CardHeader>
 
             <CardContent>
-              <Tabs defaultValue={defaultTab} className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) =>
+                  setActiveTab(value as "client" | "hotel")
+                }
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger
                     value="client"
@@ -104,48 +122,84 @@ export default function RegisterPage() {
                     Hôtel
                   </TabsTrigger>
                 </TabsList>
+
                 {/* CLIENT */}
                 <TabsContent value="client">
-                  <form
-                    onSubmit={(e) => handleSubmit(e, "client")}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label>Email</label>
-                      <Input type="email" required />
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Email</label>
+
+                      <Input
+                        type="email"
+                        placeholder="exemple@gmail.com"
+                        required
+                      />
                     </div>
 
-                    <div>
-                      <label>Mot de passe</label>
-                      <Input type="password" required />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Mot de passe
+                      </label>
+
+                      <Input type="password" placeholder="••••••••" required />
                     </div>
 
-                    <Button type="submit" className="w-full">
-                      Continuer
+                    <Button
+                      type="submit"
+                      className="w-full h-11"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Chargement...
+                        </>
+                      ) : (
+                        "Continuer"
+                      )}
                     </Button>
                   </form>
                 </TabsContent>
+
                 {/* HOTEL */}
                 <TabsContent value="hotel">
-                  <form
-                    onSubmit={(e) => handleSubmit(e, "hotel")}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label>Email</label>
-                      <Input type="email" required />
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Email professionnel
+                      </label>
+
+                      <Input
+                        type="email"
+                        placeholder="hotel@gmail.com"
+                        required
+                      />
                     </div>
 
-                    <div>
-                      <label>Mot de passe</label>
-                      <Input type="password" required />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Mot de passe
+                      </label>
+
+                      <Input type="password" placeholder="••••••••" required />
                     </div>
 
-                    <Button type="submit" className="w-full">
-                      Continuer
+                    <Button
+                      type="submit"
+                      className="w-full h-11"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Chargement...
+                        </>
+                      ) : (
+                        "Continuer"
+                      )}
                     </Button>
                   </form>
-                </TabsContent>{" "}
+                </TabsContent>
               </Tabs>
 
               <div className="mt-6 text-center text-sm text-muted-foreground">

@@ -27,7 +27,9 @@ export const Hotels: Hotel[] = [
     price: 95,
     image: [
       img("photo-1520250497591-112f2f40a3f4"),
-      img("photo-1501117716987-c8e1ecb2106e"),
+      img("photo-1542314831-068cd1dbfeeb"),
+      img("photo-1520250497591-112f2f40a3f4"),
+      img("photo-1520250497591-112f2f40a3f4"),
     ],
     amenities: ["wifi", "tv", "restaurant"],
     rooms: [

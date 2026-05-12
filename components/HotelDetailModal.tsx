@@ -93,7 +93,7 @@ export const HotelDetailModal = () => {
     setBooked(true);
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-72 bg-black/40 backdrop-blur-sm">
       <div className="bg-white  w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-xl relative">
         {/* CLOSE */}
         <button
@@ -103,46 +103,41 @@ export const HotelDetailModal = () => {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="grid lg:grid-cols-2 gap-6 p-6">
-          {/* LEFT SIDE */}
-          <div className="lg:col-span-2">
-            {/* IMAGE GRID */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden">
-                <img
-                  src={hotel.image[activeImage]}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {hotel.image.slice(1, 5).map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  onClick={() => setActiveImage(i + 1)}
-                  className="rounded-xl object-cover w-full h-full cursor-pointer hover:opacity-80"
-                />
-              ))}
+        <div className="flex flex-col gap-6 p-6">
+          <div className="flex flex-col w-full   lg:flex-row  gap-6 ">
+            <div className="lg:flex-3  overflow-hidden">
+              <img
+                src={hotel.image[activeImage]}
+                className="w-full h-full object-cover"
+              />
             </div>
 
+            <div className="lg:flex-1 overflow-x-scroll">
+              {/* IMAGE GRID */}
+              <div className="flex lg:flex-col  gap-4">
+                {hotel.image.slice(1).map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    onClick={() => setActiveImage(i + 1)}
+                    className="  object-cover w-[30%] lg:w-full h-full cursor-pointer hover:opacity-80"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div>
             {/* TITLE */}
             <h2 className="text-3xl font-bold mb-2">{hotel.name}</h2>
 
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center justify-between gap-4 text-sm text-gray-500 mb-4">
+              <span className="flex items-center  gap-1">
                 <MapPin className="w-4 h-4" /> {hotel.city}
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center  gap-1">
                 <Star className="w-4 h-4 text-yellow-500" />
                 {hotel.rating} ({hotel.reviews})
               </span>
-            </div>
-
-            {/* TAGS */}
-            <div className="flex gap-2 mb-6 flex-wrap">
-              <Badge>Minimalist</Badge>
-              <Badge>Beach</Badge>
-              <Badge>Luxury</Badge>
             </div>
 
             {/* FEATURES */}
@@ -158,9 +153,12 @@ export const HotelDetailModal = () => {
             <p className="text-gray-600 leading-relaxed mb-6">
               {hotel.description}
             </p>
+          </div>
 
+          {/* LEFT SIDE */}
+          <div className="flex-1">
             {/* ROOMS */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/* <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {hotel.rooms.map((r, i) => (
                 <div
                   key={r.id}
@@ -183,9 +181,10 @@ export const HotelDetailModal = () => {
                   <p className="font-bold">${r.price}/nuit</p>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
+        <Button>Reserver une chambre</Button>
       </div>
     </div>
   );

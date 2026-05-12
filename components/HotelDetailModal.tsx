@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
+import { useRouter } from "next/navigation";
 import {
   X,
   MapPin,
@@ -33,6 +34,12 @@ export const HotelDetailModal = () => {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
   const [booked, setBooked] = useState(false);
+
+  const router = useRouter();
+  const handleReserve = () => {
+    router.push(`/hotels/${hotel.id}/rooms`);
+    closeHotel();
+  };
 
   useEffect(() => {
     if (selectedHotel) {
@@ -92,6 +99,7 @@ export const HotelDetailModal = () => {
     });
     setBooked(true);
   };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-72 bg-gray-50/15 backdrop-blur-sm">
       <div className="bg-white  w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-xl relative">
@@ -186,16 +194,20 @@ export const HotelDetailModal = () => {
             </div> */}
           </div>
         </div>
-        <div className="flex justify-end mb-6 pr-4 gap-4 ">
-          <Button variant={"destructive"} onClick={closeHotel}>
+        <div className="flex justify-center lg:justify-end px-12 gap-4 pb-6 ">
+          <Button
+            variant={"destructive"}
+            size={"default"}
+            onClick={() => closeHotel()}
+          >
             Annuler
           </Button>
           <Button
             variant={"default"}
             size={"default"}
-            onClick={() => alert("etes-vous connecté ?")}
+            onClick={() => handleReserve()}
           >
-            Reserver une chambre
+            Réserver une chambre
           </Button>
         </div>
       </div>

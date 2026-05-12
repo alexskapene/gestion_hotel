@@ -93,17 +93,19 @@ export const HotelDetailModal = () => {
     setBooked(true);
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-72 bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-72 bg-gray-50/15 backdrop-blur-sm">
       <div className="bg-white  w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-xl relative">
         {/* CLOSE */}
-        <button
+        <Button
           onClick={closeHotel}
-          className="fixed top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
+          variant={"destructive"}
+          size={"icon"}
+          className="fixed top-4 right-4 rounded-full flex items-center justify-center"
         >
           <X className="w-5 h-5" />
-        </button>
+        </Button>
 
-        <div className="flex flex-col gap-6 p-6">
+        <div className=" flex flex-col gap-6 p-6">
           <div className="flex flex-col w-full   lg:flex-row  gap-6 ">
             <div className="lg:flex-3  overflow-hidden">
               <img
@@ -135,7 +137,7 @@ export const HotelDetailModal = () => {
                 <MapPin className="w-4 h-4" /> {hotel.city}
               </span>
               <span className="flex items-center  gap-1">
-                <Star className="w-4 h-4 text-yellow-500" />
+                <Star className="w-4 h-4 text-foreground" />
                 {hotel.rating} ({hotel.reviews})
               </span>
             </div>
@@ -184,7 +186,18 @@ export const HotelDetailModal = () => {
             </div> */}
           </div>
         </div>
-        <Button>Reserver une chambre</Button>
+        <div className="flex justify-end mb-6 pr-4 gap-4 ">
+          <Button variant={"destructive"} onClick={closeHotel}>
+            Annuler
+          </Button>
+          <Button
+            variant={"default"}
+            size={"default"}
+            onClick={() => alert("etes-vous connecté ?")}
+          >
+            Reserver une chambre
+          </Button>
+        </div>
       </div>
     </div>
   );

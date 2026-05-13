@@ -39,7 +39,7 @@ export default function RegisterPage() {
 
     // Redirection selon le profil actif
     if (activeTab === "hotel") {
-      router.replace("/dashboard/hotel");
+      router.replace("/onboarding/hotel");
     } else {
       router.replace("/dashboard/client");
     }
@@ -48,7 +48,8 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row">
       {/* LEFT IMAGE */}
-      <div className="relative hidden md:flex w-1/2 min-h-screen bg-cover bg-center flex-col"
+      <div
+        className="relative hidden md:flex w-1/2 min-h-screen bg-cover bg-center flex-col"
         style={{ backgroundImage: "url('/room.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/60" />
@@ -76,7 +77,7 @@ export default function RegisterPage() {
       </div>
 
       {/* RIGHT FORM */}
-      <div className="min-h-screen w-full md:w-1/2 bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen w-full md:w-1/2 bg-background flex items-start md:items-center justify-center p-4 pt-10 md:pt-4">
         <div className="w-full max-w-md">
           {/* MOBILE BACK */}
           <div className="md:hidden mb-4">
@@ -88,11 +89,11 @@ export default function RegisterPage() {
             </Link>
           </div>
 
-          <Card className="bg-white border-0 shadow-xl">
+          <Card className="bg-white">
             <CardHeader className="text-center space-y-2">
               <CardTitle className="font-serif text-3xl">
                 Créer un compte
-              </CardTitle>r'
+              </CardTitle>
 
               <CardDescription>Rejoignez Zua Place</CardDescription>
             </CardHeader>
@@ -127,21 +128,38 @@ export default function RegisterPage() {
                 <TabsContent value="client">
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
+                      <label className="text-sm font-medium">Nom complet</label>
+
+                      <Input
+                        type="text"
+                        placeholder="John Doe"
+                        className="h-11"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <label className="text-sm font-medium">Email</label>
 
                       <Input
                         type="email"
                         placeholder="exemple@gmail.com"
+                        className="h-11"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">
-                        Mot de passe
+                        Numéro de téléphone
                       </label>
 
-                      <Input type="password" placeholder="••••••••" required />
+                      <Input
+                        type="tel"
+                        placeholder="+243 900 000 000"
+                        className="h-11"
+                        required
+                      />
                     </div>
 
                     <Button
@@ -155,7 +173,7 @@ export default function RegisterPage() {
                           Chargement...
                         </>
                       ) : (
-                        "Continuer"
+                        "Créer un compte"
                       )}
                     </Button>
                   </form>
@@ -166,22 +184,41 @@ export default function RegisterPage() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">
-                        Email professionnel
+                        Nom du responable
                       </label>
 
                       <Input
-                        type="email"
-                        placeholder="hotel@gmail.com"
+                        type="text"
+                        placeholder="Ex: Hôtel Résidence"
+                        className="h-11"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">
-                        Mot de passe
+                        Email du responable
                       </label>
 
-                      <Input type="password" placeholder="••••••••" required />
+                      <Input
+                        type="email"
+                        placeholder="hotel@gmail.com"
+                        className="h-11"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Numéro de téléphone
+                      </label>
+
+                      <Input
+                        type="tel"
+                        placeholder="+243 900 000 000"
+                        className="h-11"
+                        required
+                      />
                     </div>
 
                     <Button

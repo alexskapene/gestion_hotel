@@ -36,21 +36,9 @@ export default auth((req) => {
       return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
   }
-
-  // Hotel rooms protection
-  if (nextUrl.pathname.match(/^\/hotels\/[^/]+\/rooms$/)) {
-    if (!isLoggedIn) {
-      const loginUrl = new URL("/auth/login", nextUrl);
-
-      loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
-
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
   return NextResponse.next();
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/hotels/:path*"],
+  matcher: ["/dashboard/:path*"],
 };

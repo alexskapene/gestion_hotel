@@ -28,6 +28,8 @@ function LoginContent() {
     password: "",
   });
 
+  const callbackUrl = searchParams.get("callbackUrl");
+
   const handleSubmit = async (e: React.FormEvent, type: string) => {
     e.preventDefault();
     setIsLoading(true);
@@ -45,7 +47,11 @@ function LoginContent() {
         return;
       }
 
-      // If successful, redirect based on the type
+      if (callbackUrl) {
+        router.push(callbackUrl);
+        return;
+      }
+
       if (type === "hotel") {
         router.push("/dashboard/hotel");
       } else {
@@ -135,6 +141,18 @@ function LoginContent() {
                     Hôtel
                   </TabsTrigger>
                 </TabsList>
+
+                {callbackUrl && (
+                  <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+                    <p className="font-semibold">
+                      Connexion requise pour poursuivre votre réservation.
+                    </p>
+                    <p>
+                      Après la connexion, vous reviendrez automatiquement à
+                      votre réservation.
+                    </p>
+                  </div>
+                )}
 
                 {/* CLIENT */}
                 <TabsContent value="client">
@@ -330,11 +348,13 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen w-full flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen w-full flex items-center justify-center">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );

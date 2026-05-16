@@ -14,10 +14,13 @@ import {
   Phone,
   Check,
   Lock,
+  ArrowLeft,
+  ChevronLeft,
+  CreditCard,
+  Smartphone,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-
+import PaypalIcon from "@iconify-react/logos/paypal";
 type ModalStep = "DETAILS" | "ROOMS" | "BOOKING" | "PAYMENT" | "SUCCESS";
 
 type PendingBooking = {
@@ -61,6 +64,11 @@ export const HotelDetailModal = () => {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<
+    "paypal" | "airtel" | "orange" | "mpesa"
+  >("paypal");
+  const [paymentDetail, setPaymentDetail] = useState("");
+  const [payerName, setPayerName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: session, status } = useSession();
 
@@ -199,6 +207,13 @@ export const HotelDetailModal = () => {
     setIsSubmitting(true);
 
     try {
+      if (!payerName.trim() || !paymentDetail.trim()) {
+        setErrorMessage(
+          "Veuillez saisir le nom du titulaire et les détails du paiement.",
+        );
+        return;
+      }
+
       const createResponse = await fetch("/api/reservations", {
         method: "POST",
         headers: {
@@ -211,6 +226,9 @@ export const HotelDetailModal = () => {
           guests,
           totalPrice: total,
           clientId: String((session.user as any).id),
+          paymentMethod,
+          paymentReference: paymentDetail,
+          payerName,
         }),
       });
 
@@ -276,7 +294,7 @@ export const HotelDetailModal = () => {
           onClick={closeHotel}
           variant="destructive"
           size="icon"
-          className="fixed top-4 right-4 rounded-full z-50"
+          className=" hidden md:flex fixed top-4 right-4 rounded-full z-50"
         >
           <X className="w-5 h-5" />
         </Button>
@@ -446,7 +464,9 @@ export const HotelDetailModal = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div>
-                    <label className="block mb-2 font-medium">Check-in</label>
+                    <label className="block mb-2 font-medium">
+                      Date d'entrée
+                    </label>
                     <input
                       type="date"
                       value={checkIn}
@@ -456,7 +476,9 @@ export const HotelDetailModal = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 font-medium">Check-out</label>
+                    <label className="block mb-2 font-medium">
+                      Date de sortie
+                    </label>
                     <input
                       type="date"
                       value={checkOut}
@@ -466,7 +488,9 @@ export const HotelDetailModal = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 font-medium">Invités</label>
+                    <label className="block mb-2 font-medium">
+                      Nombre de personnes
+                    </label>
                     <input
                       type="number"
                       min={1}
@@ -477,20 +501,43 @@ export const HotelDetailModal = () => {
                   </div>
                 </div>
 
-                <div className="border border-border bg-muted p-6 rounded-3xl">
+                <div className="border border-border bg-muted/50 p-6">
                   <h3 className="text-2xl font-semibold mb-6">Résumé</h3>
-                  <div className="space-y-3">
-                    <p>
-                      Hôtel : <strong>{hotel.name}</strong>
-                    </p>
-                    <p>
-                      Chambre : <strong>{room.type}</strong>
-                    </p>
-                    <p>
-                      Nombre de nuits : <strong>{nights}</strong>
-                    </p>
-                    <p className="text-4xl font-bold pt-6">${total}</p>
-                  </div>
+
+                  <table>
+                    <tbody className="divide-y">
+                      <tr>
+                        <td scope="row" className="py-3 ">
+                          Hotel
+                        </td>
+                        <td className="pl-12 font-bold">{hotel.name}</td>
+                      </tr>
+                      <tr>
+                        <td scope="row" className="py-3">
+                          Chambre
+                        </td>
+                        <td className="pl-12 font-bold">{room.type}</td>
+                      </tr>
+                      <tr>
+                        <td scope="row" className="py-3">
+                          Nombre de nuits
+                        </td>
+                        <td className="pl-12 font-bold">{nights}</td>
+                      </tr>
+                      <tr>
+                        <td scope="row" className="py-3">
+                          Prix par nuit
+                        </td>
+                        <td className="pl-12 font-bold">${room.price}</td>
+                      </tr>
+                      <tr>
+                        <td scope="row" className="py-3">
+                          Prix total
+                        </td>
+                        <td className="pl-12 font-bold">${total}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -501,27 +548,118 @@ export const HotelDetailModal = () => {
               <div>
                 <h2 className="text-4xl font-bold">Paiement</h2>
                 <p className="text-muted-foreground mt-2">
-                  Vérifiez les informations avant confirmation.
+                  Choisissez un mode de paiement et confirmez votre réservation.
                 </p>
               </div>
 
-              <div className="border border-border p-8 bg-muted space-y-4 rounded-3xl">
-                <p>
-                  Hôtel : <strong>{hotel.name}</strong>
-                </p>
-                <p>
-                  Chambre : <strong>{room.type}</strong>
-                </p>
-                <p>
-                  Invités : <strong>{guests}</strong>
-                </p>
-                <p>
-                  Séjour : <strong>{nights} nuits</strong>
-                </p>
+              <div className="md:w-1/2 mx-auto">
+                <div className="space-y-6 rounded-3xl border border-border bg-muted p-8">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {[
+                      {
+                        id: "paypal",
+                        label: "PayPal",
+                        description: "Paiement sécurisé en ligne",
+                        icon: <CreditCard className="w-5 h-5" />,
+                      },
+                      {
+                        id: "airtel",
+                        label: "Airtel Money",
+                        description: "Paiement mobile",
+                        icon: <Smartphone className="w-5 h-5" />,
+                      },
+                      {
+                        id: "orange",
+                        label: "Orange Money",
+                        description: "Paiement mobile",
+                        icon: <Smartphone className="w-5 h-5" />,
+                      },
+                      {
+                        id: "mpesa",
+                        label: "MPesa",
+                        description: "Paiement mobile",
+                        icon: <Smartphone className="w-5 h-5" />,
+                      },
+                    ].map((method) => (
+                      <button
+                        key={method.id}
+                        type="button"
+                        onClick={() => setPaymentMethod(method.id as any)}
+                        className={`rounded-3xl border p-4 text-left transition-colors w-full ${
+                          paymentMethod === method.id
+                            ? "border-foreground bg-primary/10"
+                            : "border-border bg-card hover:border-foreground"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                              {method.icon}
+                              {method.label}
+                            </div>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {method.description}
+                            </p>
+                          </div>
+                          {paymentMethod === method.id && (
+                            <div className="rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold text-foreground">
+                              Sélectionné
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
 
-                <div className="pt-4 border-t">
-                  <p className="text-4xl font-bold">${total}</p>
+                  <div className="grid gap-4">
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-foreground">
+                        Nom du titulaire
+                      </label>
+                      <input
+                        type="text"
+                        value={payerName}
+                        onChange={(e) => setPayerName(e.target.value)}
+                        placeholder="Nom complet"
+                        className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-foreground"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block mb-2 text-sm font-medium text-foreground">
+                        {paymentMethod === "paypal"
+                          ? "Adresse email PayPal"
+                          : "Numéro de téléphone mobile"}
+                      </label>
+                      <input
+                        type="text"
+                        value={paymentDetail}
+                        onChange={(e) => setPaymentDetail(e.target.value)}
+                        placeholder={
+                          paymentMethod === "paypal"
+                            ? "email@example.com"
+                            : "+225 01 23 45 67 89"
+                        }
+                        className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-foreground"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    Les paiements sont simulés dans cette démo. Une fois validé,
+                    votre réservation sera enregistrée dans le système.
+                  </p>
                 </div>
+                {/* 
+                <div className="flex justify-between">
+                  <span>Méthode de paiement</span>
+                  <strong className="text-foreground capitalize">
+                    {paymentMethod
+                      .replace("airtel", "Airtel")
+                      .replace("orange", "Orange")
+                      .replace("mpesa", "M-Pesa")}
+                  </strong>
+                </div> */}
               </div>
 
               {errorMessage && (
@@ -530,13 +668,15 @@ export const HotelDetailModal = () => {
                 </div>
               )}
 
-              <Button
-                onClick={handleBook}
-                disabled={isSubmitting}
-                className="w-full h-14 text-lg"
-              >
-                {isSubmitting ? "Validation..." : "Confirmer et payer"}
-              </Button>
+              <div className="text-center">
+                <Button
+                  onClick={handleBook}
+                  disabled={isSubmitting}
+                  className="w-full md:w-1/2 h-14 text-lg m-auto"
+                >
+                  {isSubmitting ? "Validation..." : "Confirmer et payer"}
+                </Button>
+              </div>
             </div>
           )}
 
@@ -556,23 +696,40 @@ export const HotelDetailModal = () => {
         </div>
 
         {step !== "SUCCESS" && (
-          <div className="flex items-center justify-between px-6 pb-6">
+          <div className="relative flex gap-4 justify-between px-6 pb-6">
+            <div
+              onClick={() => {
+                if (step === "DETAILS") setStep("DETAILS");
+                if (step === "ROOMS") setStep("DETAILS");
+                if (step === "BOOKING") setStep("ROOMS");
+                if (step === "PAYMENT") setStep("BOOKING");
+              }}
+              className={`absolute top-8 left-5 md:hidden ${step === "DETAILS" ? "hidden" : ""}`}
+            >
+              <ChevronLeft className="text-secondary hover:text-secondary/75 hover:bg-muted w-7 h-7 transition-colors rounded-sm" />
+            </div>
             <Button
-              variant="outline"
+              variant={"outline"}
               onClick={() => {
                 if (step === "ROOMS") setStep("DETAILS");
                 if (step === "BOOKING") setStep("ROOMS");
                 if (step === "PAYMENT") setStep("BOOKING");
               }}
+              className="hidden md:flex gap-2 hover:gap-4"
             >
-              Retour
+              <ArrowLeft /> Retour
             </Button>
-            <div className="flex gap-4">
+            <div className=" w-full md:w-auto flex justify-end gap-4">
               <Button variant="destructive" onClick={closeHotel}>
                 Annuler
               </Button>
               {step === "DETAILS" && (
-                <Button onClick={handleReserve} disabled={isLoadingSession}>
+                <Button
+                  variant={"default"}
+                  size={"default"}
+                  onClick={handleReserve}
+                  disabled={isLoadingSession}
+                >
                   {isLoadingSession ? "Chargement..." : "Réserver"}
                 </Button>
               )}

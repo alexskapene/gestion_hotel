@@ -53,6 +53,7 @@ export const HotelDetailModal = () => {
     bookingRestore,
     clearBookingRestore,
   } = useApp();
+
   const [step, setStep] = useState<ModalStep>("DETAILS");
   const [activeImage, setActiveImage] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState(0);
@@ -269,8 +270,8 @@ export const HotelDetailModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-20 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-20 bg-foreground/20 backdrop-blur-sm">
+      <div className="bg-card w-full max-w-7xl max-h-[95vh] overflow-y-auto shadow-2xl relative">
         <Button
           onClick={closeHotel}
           variant="destructive"
@@ -291,14 +292,16 @@ export const HotelDetailModal = () => {
                       <div
                         key={s}
                         className={`flex flex-col items-center gap-2 ${
-                          step === s ? "text-black" : "text-gray-400"
+                          step === s
+                            ? "text-foreground"
+                            : "text-muted-foreground"
                         }`}
                       >
                         <div
                           className={`w-10 h-10 rounded-full border flex items-center justify-center text-sm font-semibold ${
                             step === s
-                              ? "bg-black text-white border-black"
-                              : "border-gray-300"
+                              ? "bg-foreground text-background border-foreground"
+                              : "border-border"
                           }`}
                         >
                           {i + 1}
@@ -306,29 +309,11 @@ export const HotelDetailModal = () => {
                         <span className="hidden lg:block text-sm font-medium">
                           {stepLabels[s]}
                         </span>
-                        {locked && (
-                          <span className="text-xs text-orange-600 flex items-center gap-1">
-                            <Lock className="w-3 h-3" />
-                            Verrouillé
-                          </span>
-                        )}
                       </div>
                     );
                   },
                 )}
               </div>
-
-              {!isAuthenticated && (
-                <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-orange-800">
-                  <p className="font-semibold">
-                    Veuillez vous connecter pour continuer votre réservation.
-                  </p>
-                  <p className="text-sm">
-                    Seule la fiche de l'hôtel est accessible. Les étapes
-                    Chambres, Réservation et Paiement sont verrouillées.
-                  </p>
-                </div>
-              )}
             </div>
           )}
 
@@ -359,7 +344,7 @@ export const HotelDetailModal = () => {
               <div>
                 <h2 className="text-4xl font-bold mb-4">{hotel.name}</h2>
 
-                <div className="flex items-center justify-between gap-4 text-sm text-gray-500 mb-6">
+                <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground mb-6">
                   <span className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
                     {hotel.city}
@@ -380,7 +365,7 @@ export const HotelDetailModal = () => {
                   ))}
                 </div>
 
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   {hotel.description}
                 </p>
               </div>
@@ -391,7 +376,7 @@ export const HotelDetailModal = () => {
             <div className="space-y-6">
               <div>
                 <h2 className="text-4xl font-bold">Choisissez une chambre</h2>
-                <p className="text-gray-500 mt-2">
+                <p className="text-muted-foreground mt-2">
                   Sélectionnez la chambre idéale pour votre séjour.
                 </p>
               </div>
@@ -407,8 +392,8 @@ export const HotelDetailModal = () => {
                       onClick={() => available && setSelectedRoom(i)}
                       className={`border transition overflow-hidden rounded-3xl ${
                         active
-                          ? "border-black bg-gray-50"
-                          : "border-gray-200 hover:border-gray-400"
+                          ? "border-foreground bg-muted"
+                          : "border-border hover:border-foreground/40"
                       } ${available ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
                     >
                       <img
@@ -421,20 +406,22 @@ export const HotelDetailModal = () => {
                         <div className="flex items-center justify-between">
                           <h3 className="text-2xl font-semibold">{r.type}</h3>
                           {!available && (
-                            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                            <span className="rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
                               Indisponible
                             </span>
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2 text-gray-500">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                           <Users className="w-4 h-4" />
                           {r.capacity} personnes
                         </div>
 
                         <p className="text-3xl font-bold">
                           ${r.price}
-                          <span className="text-sm text-gray-500">/nuit</span>
+                          <span className="text-sm text-muted-foreground">
+                            /nuit
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -484,7 +471,7 @@ export const HotelDetailModal = () => {
                   </div>
                 </div>
 
-                <div className="border bg-gray-50 p-6 rounded-3xl">
+                <div className="border border-border bg-muted p-6 rounded-3xl">
                   <h3 className="text-2xl font-semibold mb-6">Résumé</h3>
                   <div className="space-y-3">
                     <p>
@@ -507,12 +494,12 @@ export const HotelDetailModal = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-4xl font-bold">Paiement</h2>
-                <p className="text-gray-500 mt-2">
+                <p className="text-muted-foreground mt-2">
                   Vérifiez les informations avant confirmation.
                 </p>
               </div>
 
-              <div className="border p-8 bg-gray-50 space-y-4 rounded-3xl">
+              <div className="border border-border p-8 bg-muted space-y-4 rounded-3xl">
                 <p>
                   Hôtel : <strong>{hotel.name}</strong>
                 </p>
@@ -532,7 +519,7 @@ export const HotelDetailModal = () => {
               </div>
 
               {errorMessage && (
-                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+                <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-destructive">
                   {errorMessage}
                 </div>
               )}
@@ -549,12 +536,12 @@ export const HotelDetailModal = () => {
 
           {step === "SUCCESS" && (
             <div className="flex flex-col items-center justify-center text-center py-20">
-              <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                <Check className="w-12 h-12 text-green-600" />
+              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                <Check className="w-12 h-12 text-primary" />
               </div>
 
               <h2 className="text-5xl font-bold mb-4">Réservation confirmée</h2>
-              <p className="text-gray-500 max-w-md mb-8">
+              <p className="text-muted-foreground max-w-md mb-8">
                 Votre réservation a été enregistrée avec succès.
               </p>
               <Button onClick={closeHotel}>Fermer</Button>

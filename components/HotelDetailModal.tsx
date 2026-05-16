@@ -20,7 +20,6 @@ import {
   Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PaypalIcon from "@iconify-react/logos/paypal";
 type ModalStep = "DETAILS" | "ROOMS" | "BOOKING" | "PAYMENT" | "SUCCESS";
 
 type PendingBooking = {

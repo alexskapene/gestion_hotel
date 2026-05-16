@@ -319,8 +319,8 @@ export const HotelDetailModal = () => {
 
           {step === "DETAILS" && (
             <>
-              <div className="flex flex-col lg:flex-row gap-6">
-                <div className="lg:flex-3 overflow-hidden rounded-3xl">
+              <div className="flex flex-col max-h-[520px] lg:flex-row gap-6">
+                <div className=" lg:flex-3 overflow-hidden">
                   <img
                     src={hotel.image[activeImage]}
                     className="w-full h-full object-cover"
@@ -330,21 +330,25 @@ export const HotelDetailModal = () => {
                 <div className="lg:flex-1 overflow-x-scroll">
                   <div className="flex lg:flex-col gap-4">
                     {hotel.image.slice(1).map((img, i) => (
-                      <img
+                      <div
                         key={i}
-                        src={img}
-                        onClick={() => setActiveImage(i + 1)}
-                        className="object-cover w-[30%] lg:w-full h-full cursor-pointer hover:opacity-80 transition rounded-3xl"
-                      />
+                        className="w-[32%] h-full lg:w-full lg:h-[80%]"
+                      >
+                        <img
+                          src={img}
+                          onClick={() => setActiveImage(i + 1)}
+                          className={`object-cover w-full h-full ${activeImage === i + 1 ? "opacity-50" : "opacity-100"} cursor-pointer hover:opacity-80 transition`}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
 
               <div>
-                <h2 className="text-4xl font-bold mb-4">{hotel.name}</h2>
+                <h2 className="text-4xl font-bold mb-2">{hotel.name}</h2>
 
-                <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground mb-6">
+                <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground mb-4">
                   <span className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
                     {hotel.city}
@@ -356,7 +360,7 @@ export const HotelDetailModal = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-6 mb-6 text-sm">
+                <div className="flex flex-wrap gap-6 mb-4 text-sm">
                   {hotel.amenities.map((a: string) => (
                     <div key={a} className="flex items-center gap-2">
                       {amenityIcons[a]}

@@ -379,13 +379,15 @@ export const HotelDetailModal = () => {
           {step === "ROOMS" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-4xl font-bold">Choisissez une chambre</h2>
+                <h2 className="text-4xl font-extrabold">
+                  Choisissez une chambre
+                </h2>
                 <p className="text-muted-foreground mt-2">
                   Sélectionnez la chambre idéale pour votre séjour.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {hotel.rooms.map((r: any, i: number) => {
                   const available = r.available !== false;
                   const active = i === selectedRoom;
@@ -394,9 +396,9 @@ export const HotelDetailModal = () => {
                       key={r.id}
                       role="button"
                       onClick={() => available && setSelectedRoom(i)}
-                      className={`border transition overflow-hidden rounded-3xl ${
+                      className={`border-2 transition overflow-hidden p-2 ${
                         active
-                          ? "border-foreground bg-muted"
+                          ? "border-foreground"
                           : "border-border hover:border-foreground/40"
                       } ${available ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
                     >

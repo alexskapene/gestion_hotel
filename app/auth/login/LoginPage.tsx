@@ -143,15 +143,9 @@ function LoginContent() {
                 </TabsList>
 
                 {callbackUrl && (
-                  <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-                    <p className="font-semibold">
-                      Connexion requise pour poursuivre votre réservation.
-                    </p>
-                    <p>
-                      Après la connexion, vous reviendrez automatiquement à
-                      votre réservation.
-                    </p>
-                  </div>
+                  <p className="text-center text-sm text-destructive my-4 font-semibold ">
+                    Connexion requise pour poursuivre votre réservation.
+                  </p>
                 )}
 
                 {/* CLIENT */}

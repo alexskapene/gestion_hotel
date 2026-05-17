@@ -64,12 +64,6 @@ async function main() {
         [userId, clientEmail, 'client', hashedClientPassword, 'CLIENT', 1, 1]
       );
       
-      // Insert Client profile (required by the schema relation)
-      await connection.execute(
-        'INSERT INTO Client (id, name, userId, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, NOW(), NOW())',
-        [clientId, 'Test Client', userId, 1]
-      );
-      
       console.log(`Client user created: ${clientEmail}`);
     }
   } catch (error) {

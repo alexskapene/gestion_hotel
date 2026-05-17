@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   if (role === "ADMIN") {
     redirect("/dashboard/admin");
-  } else if (role === "HOTEL") {
+  } else if (role === "HOTEL_OWNER") {
     redirect("/dashboard/hotel");
   } else if (role === "CLIENT") {
     redirect("/dashboard/client");

@@ -10,33 +10,24 @@ const loginSchema = z.object({
 
 export class AuthService {
   /**
-   * Valide les identifiants d'un utilisateur et vérifie s'il a le rôle ADMIN.
+   * Valide les identifiants d'un utilisateur pour tous les rôles.
    * Utilise Zod pour la validation des données et Prisma pour la sécurité SQL.
    */
-  static async validateAdminCredentials(email: string, password: string) {
+  static async validateCredentials(email: string, password: string) {
     try {
-      // 1. Validation du format des données (Sécurité anti-XSS / Injections)
       const validation = loginSchema.safeParse({ email, password });
       if (!validation.success) {
         throw new Error("Données de connexion invalides");
       }
 
-      // 2. Recherche de l'utilisateur (Prisma utilise des requêtes préparées anti-injection)
       const user = await prisma.user.findUnique({
         where: { email },
       });
 
       if (!user) {
-        // Message générique pour éviter le "user enumeration"
         throw new Error("Identifiants incorrects");
       }
 
-      // 3. Vérification stricte du rôle ADMIN
-      if (user.role !== "ADMIN") {
-        throw new Error("Accès non autorisé : Droits administrateur requis");
-      }
-
-      // 4. Vérification si le compte est actif et vérifié
       if (!user.isActive) {
         throw new Error("Votre compte a été suspendu. Veuillez contacter le support.");
       }
@@ -45,14 +36,12 @@ export class AuthService {
         throw new Error("Votre compte n'est pas encore vérifié. Veuillez valider votre email.");
       }
 
-      // 5. Comparaison sécurisée du mot de passe
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
         throw new Error("Identifiants incorrects");
       }
 
-      // 6. Retourne l'utilisateur sans les données sensibles
       return {
         id: user.id,
         username: user.username,

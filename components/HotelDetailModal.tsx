@@ -552,7 +552,7 @@ export const HotelDetailModal = () => {
               </div>
 
               <div className="md:w-1/2 mx-auto">
-                <div className="space-y-6 rounded-3xl border border-border bg-muted p-8">
+                <div className="space-y-6 border border-border bg-muted p-8">
                   <div className="grid gap-4 sm:grid-cols-2">
                     {[
                       {

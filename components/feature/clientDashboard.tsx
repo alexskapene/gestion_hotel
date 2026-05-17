@@ -1,36 +1,36 @@
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  AlertCircle,
+  ArrowRight,
   CalendarDays,
-  Hotel,
+  CheckCircle2,
   Clock,
+  Hotel,
   MapPin,
   Star,
-  ArrowRight,
-  CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
+import Link from "next/link";
 
 const stats = [
   {
     label: "Réservations Actives",
     value: "2",
     icon: CalendarDays,
-    color: "bg-primary/10 text-primary",
+    color: "bg-green-500/10 text-green-500",
   },
   {
     label: "Hôtels Visités",
     value: "5",
     icon: Hotel,
-    color: "bg-accent/10 text-accent",
+    color: "bg-yellow-500/10 text-yellow-500",
   },
   {
     label: "Nuits Totales",
     value: "12",
     icon: Clock,
-    color: "bg-chart-3/10 text-chart-3",
+    color: "bg-blue-500/10 text-blue-500",
   },
 ];
 
@@ -102,7 +102,7 @@ export default function ClientDashboardPage() {
             Voici un aperçu de vos activités récentes
           </p>
         </div>
-        <Button asChild className="rounded-full w-fit">
+        <Button asChild className="w-fit">
           <Link href="/hotels">
             Réserver une Chambre
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -113,11 +113,11 @@ export default function ClientDashboardPage() {
       {/* Stats Cards */}
       <div className="grid sm:grid-cols-3 gap-4">
         {stats.map((stat, index) => (
-          <Card key={index} className="rounded-2xl">
+          <Card key={index} className="">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-12 h-12 rounded-full ${stat.color} flex items-center justify-center`}
+                  className={`w-12 h-12 ${stat.color} flex items-center justify-center`}
                 >
                   <stat.icon className="w-6 h-6" />
                 </div>
@@ -132,12 +132,16 @@ export default function ClientDashboardPage() {
       </div>
 
       {/* Recent Reservations */}
-      <Card className="rounded-2xl">
+      <Card className="">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="font-serif text-xl">
             Réservations Récentes
           </CardTitle>
-          <Button asChild variant="ghost" className="rounded-full text-primary">
+          <Button
+            asChild
+            variant="ghost"
+            className=" text-foreground hover:underline bg-transparent hover:text-foreground hover:bg-transparent transition-colors"
+          >
             <Link href="/dashboard/client/reservations">
               Voir tout
               <ArrowRight className="w-4 h-4 ml-1" />
@@ -148,10 +152,10 @@ export default function ClientDashboardPage() {
           {recentReservations.map((reservation) => (
             <div
               key={reservation.id}
-              className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-muted/50 hover:bg-muted transition-colors"
+              className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/50 hover:bg-muted transition-colors"
             >
               <div
-                className="w-full sm:w-32 h-24 rounded-xl bg-cover bg-center flex-shrink-0"
+                className="w-full sm:w-32 h-24 bg-cover bg-center flex-shrink-0"
                 style={{ backgroundImage: `url(${reservation.image})` }}
               />
               <div className="flex-1 space-y-2">
@@ -165,10 +169,10 @@ export default function ClientDashboardPage() {
                     </p>
                   </div>
                   <Badge
-                    className={`rounded-full ${
+                    className={` ${
                       reservation.status === "confirmed"
-                        ? "bg-primary/10 text-primary"
-                        : "bg-accent/10 text-accent"
+                        ? "bg-green-500/10 text-green-500"
+                        : "bg-orange-500/10 text-orange-500"
                     }`}
                   >
                     {reservation.status === "confirmed" ? (
@@ -205,7 +209,11 @@ export default function ClientDashboardPage() {
           <h3 className="font-serif text-xl font-semibold">
             Hôtels Recommandés
           </h3>
-          <Button asChild variant="ghost" className="rounded-full text-primary">
+          <Button
+            asChild
+            variant="ghost"
+            className="text-foreground hover:underline bg-transparent hover:text-foreground hover:bg-transparent transition-colors"
+          >
             <Link href="/hotels">
               Voir plus
               <ArrowRight className="w-4 h-4 ml-1" />
@@ -215,7 +223,7 @@ export default function ClientDashboardPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {recommendedHotels.map((hotel) => (
             <Link key={hotel.id} href={`/hotels/${hotel.id}`}>
-              <Card className="rounded-2xl overflow-hidden hover:shadow-lg transition-shadow group">
+              <Card className=" overflow-hidden hover:shadow-lg transition-shadow group">
                 <div
                   className="h-36 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
                   style={{ backgroundImage: `url(${hotel.image})` }}

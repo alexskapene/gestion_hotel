@@ -56,7 +56,10 @@ export function DashboardHeader({
               <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 z-[100] shadow-2xl border-border bg-card">
+          <DropdownMenuContent
+            align="end"
+            className="w-80 z-[100] shadow-2xl border-border bg-card"
+          >
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="p-4 text-center text-sm text-muted-foreground">
@@ -75,7 +78,7 @@ export function DashboardHeader({
               <Avatar className="h-8 w-8 border border-border group-hover:border-primary transition-colors hover:text-white hover:bg-primary">
                 <AvatarImage src={session?.user?.image || ""} />
                 <AvatarFallback className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                   {userName.substring(0, 2).toUpperCase()}
+                  {userName.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 
@@ -84,7 +87,10 @@ export function DashboardHeader({
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 z-[100] shadow-2xl border-border bg-card">
+          <DropdownMenuContent
+            align="end"
+            className="w-64 z-[100] shadow-2xl border-border bg-card"
+          >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{userName}</p>

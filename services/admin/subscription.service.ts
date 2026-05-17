@@ -2,16 +2,23 @@ import prisma from "@/lib/prisma";
 import { SubscriptionStatus } from "@prisma/client";
 
 export class AdminSubscriptionService {
-  static async getAllSubscriptions(search?: string) {
+  static async getAllSubscriptions(search?: string, status?: string) {
     return prisma.subscription.findMany({
-      where: search
-        ? {
-            OR: [
-              { planName: { contains: search, mode: "insensitive" } },
-              { hotel: { name: { contains: search, mode: "insensitive" } } },
-            ],
-          }
-        : {},
+      where: {
+        AND: [
+          status && status !== "ALL"
+            ? { status: status as SubscriptionStatus }
+            : {},
+          search
+            ? {
+                OR: [
+                  { planName: { contains: search, mode: "insensitive" } },
+                  { hotel: { name: { contains: search, mode: "insensitive" } } },
+                ],
+              }
+            : {},
+        ],
+      },
       include: {
         hotel: true,
         transactions: true,

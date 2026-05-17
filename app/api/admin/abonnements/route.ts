@@ -10,8 +10,9 @@ export const GET = auth(async (req) => {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || undefined;
+    const status = searchParams.get("status") || undefined;
 
-    const subscriptions = await AdminSubscriptionService.getAllSubscriptions(search);
+    const subscriptions = await AdminSubscriptionService.getAllSubscriptions(search, status);
     return NextResponse.json(subscriptions);
   } catch (error: any) {
     console.error("[ADMIN_SUBSCRIPTIONS_GET_ERROR]:", error);

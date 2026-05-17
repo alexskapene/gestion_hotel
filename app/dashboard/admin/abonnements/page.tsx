@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, FormEvent } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -12,6 +13,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +56,19 @@ import {
   XCircle,
 } from "lucide-react";
 
+const statusOptions = [
+  { label: "Tous les statuts", value: "ALL" },
+  { label: "Actif", value: "ACTIVE" },
+  { label: "Expiré", value: "EXPIRED" },
+  { label: "Annulé", value: "CANCELLED" },
+];
+
+const subscriptionStatusOptions = [
+  { label: "Actif", value: "ACTIVE" },
+  { label: "Expiré", value: "EXPIRED" },
+  { label: "Annulé", value: "CANCELLED" },
+];
+
 const formatDate = (dateString?: string | null) => {
   if (!dateString) return "-";
   return new Date(dateString).toLocaleDateString();
@@ -49,10 +78,22 @@ export default function SubscriptionsManagementPage() {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("ALL");
   const [isSubscriptionsLoading, setIsSubscriptionsLoading] = useState(true);
   const [isTransactionsLoading, setIsTransactionsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"create" | "edit">("create");
+  const [selectedSubscription, setSelectedSubscription] = useState<any | null>(null);
+  const [hotels, setHotels] = useState<any[]>([]);
+  const [formData, setFormData] = useState({
+    hotelId: "",
+    planName: "",
+    amount: "",
+    days: "30",
+    status: "ACTIVE",
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -79,6 +120,7 @@ export default function SubscriptionsManagementPage() {
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.set("search", searchTerm);
+      if (filterStatus !== "ALL") params.set("status", filterStatus);
 
       const response = await fetch(`/api/admin/abonnements?${params.toString()}`);
       const data = await response.json();
@@ -93,7 +135,7 @@ export default function SubscriptionsManagementPage() {
     } finally {
       setIsSubscriptionsLoading(false);
     }
-  }, [searchTerm, refreshKey]);
+  }, [searchTerm, filterStatus, refreshKey]);
 
   const fetchTransactions = useCallback(async () => {
     setIsTransactionsLoading(true);
@@ -116,6 +158,89 @@ export default function SubscriptionsManagementPage() {
     }
   }, [searchTerm, refreshKey]);
 
+  const fetchHotels = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/admin/hotels`);
+      const data = await response.json();
+      if (response.ok) {
+        setHotels(data || []);
+      }
+    } catch {
+      setHotels([]);
+    }
+  }, []);
+
+  const openCreateModal = () => {
+    setModalType("create");
+    setSelectedSubscription(null);
+    setFormData({ hotelId: "", planName: "", amount: "", days: "30", status: "ACTIVE" });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (subscription: any) => {
+    setModalType("edit");
+    setSelectedSubscription(subscription);
+    setFormData({
+      hotelId: subscription.hotelId || "",
+      planName: subscription.planName || "",
+      amount: String(subscription.amount || ""),
+      days: String(Math.ceil(
+        (new Date(subscription.endDate).getTime() - new Date(subscription.startDate).getTime()) /
+        (1000 * 60 * 60 * 24)
+      ) || 30),
+      status: subscription.status || "ACTIVE",
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedSubscription(null);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setActionLoading(true);
+
+    try {
+      if (modalType === "create") {
+        const response = await fetch(`/api/admin/abonnements`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            hotelId: formData.hotelId,
+            planName: formData.planName,
+            amount: Number(formData.amount),
+            days: Number(formData.days),
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.error || "Impossible de créer l'abonnement");
+        }
+        toast.success("Abonnement créé");
+      } else if (modalType === "edit" && selectedSubscription) {
+        const response = await fetch(`/api/admin/abonnements/${selectedSubscription.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: formData.status }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.error || "Impossible de mettre à jour l'abonnement");
+        }
+        toast.success("Statut de l'abonnement mis à jour");
+      }
+
+      setRefreshKey((prev) => prev + 1);
+      closeModal();
+    } catch (error: any) {
+      toast.error(error?.message || "Erreur d'action");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchSubscriptions();
@@ -124,6 +249,10 @@ export default function SubscriptionsManagementPage() {
 
     return () => clearTimeout(timer);
   }, [fetchSubscriptions, fetchTransactions]);
+
+  useEffect(() => {
+    fetchHotels();
+  }, [fetchHotels]);
 
   const averageAmount = useMemo(() => {
     if (subscriptions.length === 0) return 0;
@@ -194,6 +323,13 @@ export default function SubscriptionsManagementPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
+            variant="secondary"
+            className="h-11 gap-2"
+            onClick={openCreateModal}
+          >
+            <CreditCard className="w-4 h-4" /> Nouvel abonnement
+          </Button>
+          <Button
             variant="outline"
             className="h-11 gap-2"
             onClick={() => setRefreshKey((prev) => prev + 1)}
@@ -250,8 +386,8 @@ export default function SubscriptionsManagementPage() {
         </Card>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 bg-card p-4 border border-border shadow-sm">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-4 bg-card p-4 border border-border shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher par hôtel, transaction ou forfait..."
@@ -260,9 +396,32 @@ export default function SubscriptionsManagementPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="gap-2 h-11 px-5 border-border/50">
-          <Filter className="w-4 h-4" /> Tout afficher
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="w-full sm:w-[220px]">
+            <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value)}>
+              <SelectTrigger className="h-11 w-full">
+                <SelectValue placeholder="Filtrer par statut" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="outline"
+            className="gap-2 h-11 px-5 border-border/50"
+            onClick={() => {
+              setSearchTerm("");
+              setFilterStatus("ALL");
+            }}
+          >
+            <Filter className="w-4 h-4" /> Tout afficher
+          </Button>
+        </div>
       </div>
 
       <div className="bg-card border border-border shadow-sm overflow-hidden">
@@ -325,7 +484,9 @@ export default function SubscriptionsManagementPage() {
                         <DropdownMenuLabel className="text-[10px] uppercase">Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="cursor-pointer">Afficher</DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer">Mettre à jour</DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer" onClick={() => openEditModal(sub)}>
+                          Mettre à jour
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleDeleteSubscription(sub.id)}
@@ -343,6 +504,116 @@ export default function SubscriptionsManagementPage() {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[520px] border-none shadow-2xl">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-serif">
+                {modalType === "create" ? "Créer un abonnement" : "Modifier le statut"}
+              </DialogTitle>
+              <DialogDescription>
+                {modalType === "create"
+                  ? "Ajoutez un nouvel abonnement en sélectionnant un hôtel, un forfait et la durée."
+                  : "Mettez à jour le statut de l'abonnement sélectionné."}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-6 py-4">
+              {modalType === "create" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="hotel">Hôtel</Label>
+                    <Select value={formData.hotelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, hotelId: value }))}>
+                      <SelectTrigger className="h-11 w-full">
+                        <SelectValue placeholder={hotels.length ? "Choisir un hôtel" : "Chargement des hôtels..."} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hotels.length === 0 ? (
+                          <SelectItem value="no-hotel" disabled>
+                            Aucun hôtel disponible
+                          </SelectItem>
+                        ) : (
+                          hotels.map((hotel) => (
+                            <SelectItem key={hotel.id} value={hotel.id}>
+                              {hotel.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="planName">Forfait</Label>
+                    <Input
+                      id="planName"
+                      placeholder="Ex: Premium 30 jours"
+                      required
+                      value={formData.planName}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, planName: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="amount">Montant</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        min={0}
+                        placeholder="Prix en $"
+                        required
+                        value={formData.amount}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="days">Durée (jours)</Label>
+                      <Input
+                        id="days"
+                        type="number"
+                        min={1}
+                        required
+                        value={formData.days}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, days: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {modalType === "edit" && (
+                <div className="space-y-2">
+                  <Label htmlFor="status">Statut</Label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData((prev) => ({ ...prev, status: value }))}>
+                    <SelectTrigger className="h-11 w-full">
+                      <SelectValue placeholder="Choisir un statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subscriptionStatusOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Button variant="outline" onClick={closeModal} type="button">
+                Annuler
+              </Button>
+              <Button type="submit" disabled={actionLoading}>
+                {modalType === "create" ? "Créer" : "Mettre à jour"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <div className="bg-card border border-border shadow-sm overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-border">

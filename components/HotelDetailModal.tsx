@@ -19,7 +19,13 @@ import {
   CreditCard,
   Smartphone,
 } from "lucide-react";
+import PayPal from "@/assets/paypal-3.svg";
+import Orange from "@/assets/Orange_Money-Logo.wine.svg";
+import Airtel from "@/assets/Airtel_Networks_Limited-Logo.wine.svg";
+import Vodacom from "@/assets/Vodacom-Logo.wine.svg";
+
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 type ModalStep = "DETAILS" | "ROOMS" | "BOOKING" | "PAYMENT" | "SUCCESS";
 
 type PendingBooking = {
@@ -553,60 +559,58 @@ export const HotelDetailModal = () => {
 
               <div className="md:w-1/2 mx-auto">
                 <div className="space-y-6 border border-border bg-muted p-8">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-4 gap-6">
                     {[
                       {
                         id: "paypal",
                         label: "PayPal",
-                        description: "Paiement sécurisé en ligne",
-                        icon: <CreditCard className="w-5 h-5" />,
+                        icon: PayPal,
                       },
+
                       {
                         id: "airtel",
                         label: "Airtel Money",
-                        description: "Paiement mobile",
-                        icon: <Smartphone className="w-5 h-5" />,
+                        icon: Airtel,
                       },
+
                       {
                         id: "orange",
                         label: "Orange Money",
-                        description: "Paiement mobile",
-                        icon: <Smartphone className="w-5 h-5" />,
+                        icon: Orange,
                       },
+
                       {
                         id: "mpesa",
                         label: "MPesa",
-                        description: "Paiement mobile",
-                        icon: <Smartphone className="w-5 h-5" />,
+                        icon: Vodacom,
                       },
                     ].map((method) => (
-                      <button
+                      <label
                         key={method.id}
-                        type="button"
-                        onClick={() => setPaymentMethod(method.id as any)}
-                        className={`rounded-3xl border p-4 text-left transition-colors w-full ${
-                          paymentMethod === method.id
-                            ? "border-foreground bg-primary/10"
-                            : "border-border bg-card hover:border-foreground"
-                        }`}
+                        className="flex items-center gap-3 cursor-pointer"
                       >
-                        <div className="flex items-center justify-between gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                              {method.icon}
-                              {method.label}
-                            </div>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              {method.description}
-                            </p>
+                        {/* radio */}
+                        <input
+                          type="radio"
+                          name="payment"
+                          checked={paymentMethod === method.id}
+                          onChange={() => setPaymentMethod(method.id as any)}
+                          className="    appearance-none w-5 h-5 rounded-full border border-foreground/15 relative p-2 after:content-[''] after:absolute after:inset-[4px] after:rounded-full after:bg-primary after:scale-0 checked:after:scale-100 transition-all"
+                        />
+
+                        {/* card */}
+                        <div
+                          className={` border p-4 transition-all w-full  border-foreground/15`}
+                        >
+                          <div className="flex items-center justify-center">
+                            <Image
+                              src={method.icon}
+                              alt={method.label}
+                              className="object-contain w-full h-full"
+                            />
                           </div>
-                          {paymentMethod === method.id && (
-                            <div className="rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold text-foreground">
-                              Sélectionné
-                            </div>
-                          )}
                         </div>
-                      </button>
+                      </label>
                     ))}
                   </div>
 

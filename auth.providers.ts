@@ -12,7 +12,7 @@ export const providers = [
 
       try {
         const { AuthService } = await import("@/services/auth.service");
-        const user = await AuthService.validateAdminCredentials(
+        const user = await AuthService.validateCredentials(
           credentials.email as string,
           credentials.password as string
         );

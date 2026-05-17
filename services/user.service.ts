@@ -1,16 +1,15 @@
 import prisma from "@/lib/prisma";
-import { Role, User } from "@prisma/client";
+import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 export class UserService {
   /**
-   * Create a new user with its associated profile (Client or Hotel)
+   * Create a new user and, when c'est un propriétaire, un hôtel lié.
    */
   static async createUser(data: any) {
     const { email, password, username, role, ...profileData } = data;
-    
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     return prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
@@ -21,22 +20,18 @@ export class UserService {
         },
       });
 
-      if (role === Role.HOTEL) {
+      if (role === Role.HOTEL_OWNER) {
         await tx.hotel.create({
           data: {
-            userId: user.id,
+            ownerId: user.id,
             name: profileData.name || "Nouveau Hôtel",
             address: profileData.address || "",
             city: profileData.city || "",
-          },
-        });
-      } else {
-        await tx.client.create({
-          data: {
-            userId: user.id,
-            name: profileData.name,
-            phone: profileData.phone,
-            address: profileData.address,
+            slug: profileData.slug || `hotel-${Date.now()}`,
+            description: profileData.description || "",
+            shortDescription: profileData.shortDescription || "",
+            hotelType: profileData.hotelType || "HOTEL",
+            country: profileData.country || "",
           },
         });
       }
@@ -46,27 +41,27 @@ export class UserService {
   }
 
   /**
-   * Get user by ID with relations
+   * Get user by ID with relations.
    */
   static async getUserById(id: string) {
     return prisma.user.findUnique({
       where: { id },
       include: {
-        client: true,
-        hotel: true,
+        hotels: true,
+        reservations: true,
+        reviews: true,
       },
     });
   }
 
   /**
-   * Get all users with filters
+   * Get all users with filters.
    */
   static async getAllUsers(filters: { role?: Role; isActive?: boolean } = {}) {
     return prisma.user.findMany({
       where: filters,
       include: {
-        client: true,
-        hotel: true,
+        hotels: true,
       },
       orderBy: { createdAt: "desc" },
     });

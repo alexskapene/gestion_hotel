@@ -558,15 +558,9 @@ export const HotelDetailModal = () => {
               </div>
 
               <div className="md:w-1/2 mx-auto">
-                <div className="space-y-6 border border-border bg-muted p-8">
-                  <div className="grid grid-cols-4 gap-6">
+                <div className="space-y-6 border border-border  p-8">
+                  <div className="flex gap-4">
                     {[
-                      {
-                        id: "paypal",
-                        label: "PayPal",
-                        icon: PayPal,
-                      },
-
                       {
                         id: "airtel",
                         label: "Airtel Money",
@@ -587,7 +581,7 @@ export const HotelDetailModal = () => {
                     ].map((method) => (
                       <label
                         key={method.id}
-                        className="flex items-center gap-3 cursor-pointer"
+                        className="w-[30%] h-12 flex items-center justitfy-center  gap-2 cursor-pointer "
                       >
                         {/* radio */}
                         <input
@@ -595,20 +589,16 @@ export const HotelDetailModal = () => {
                           name="payment"
                           checked={paymentMethod === method.id}
                           onChange={() => setPaymentMethod(method.id as any)}
-                          className="    appearance-none w-5 h-5 rounded-full border border-foreground/15 relative p-2 after:content-[''] after:absolute after:inset-[4px] after:rounded-full after:bg-primary after:scale-0 checked:after:scale-100 transition-all"
+                          className=" appearance-none w-5 h-5 rounded-full border border-foreground/15 relative p-2 after:content-[''] after:absolute after:inset-[4px] after:rounded-full after:bg-secondary after:scale-0 checked:after:scale-100  transition-all"
                         />
-
-                        {/* card */}
                         <div
-                          className={` border p-4 transition-all w-full  border-foreground/15`}
+                          className={`w-full h-full border ${paymentMethod === method.id ? "border-secondary" : "border-foreground/15"} transition-all `}
                         >
-                          <div className="flex items-center justify-center">
-                            <Image
-                              src={method.icon}
-                              alt={method.label}
-                              className="object-contain w-full h-full"
-                            />
-                          </div>
+                          <Image
+                            src={method.icon}
+                            alt={method.label}
+                            className="object-contain w-full h-full"
+                          />
                         </div>
                       </label>
                     ))}
@@ -624,7 +614,7 @@ export const HotelDetailModal = () => {
                         value={payerName}
                         onChange={(e) => setPayerName(e.target.value)}
                         placeholder="Nom complet"
-                        className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-foreground"
+                        className="w-full border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-foreground"
                       />
                     </div>
 
@@ -641,16 +631,16 @@ export const HotelDetailModal = () => {
                         placeholder={
                           paymentMethod === "paypal"
                             ? "email@example.com"
-                            : "+225 01 23 45 67 89"
+                            : "+243 000 000 000"
                         }
-                        className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-foreground"
+                        className="w-full  border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-foreground"
                       />
                     </div>
                   </div>
 
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    Les paiements sont simulés dans cette démo. Une fois validé,
-                    votre réservation sera enregistrée dans le système.
+                  <p className="text-sm text-center leading-6 text-muted-foreground">
+                    Votre réservation sera enregistrée une fois le paiement
+                    simulé validé.
                   </p>
                 </div>
                 {/* 

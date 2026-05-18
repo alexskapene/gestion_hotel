@@ -57,6 +57,9 @@ function LoginContent() {
       } else {
         router.push("/dashboard/client");
       }
+      // Redirect to the dashboard landing page.
+      // The dashboard page will forward the user to the correct role-specific dashboard.
+      router.push("/dashboard");
     } catch (error) {
       console.error("An error occurred during login:", error);
       setIsLoading(false);

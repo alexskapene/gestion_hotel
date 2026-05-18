@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Hotel, User } from "lucide-react";
+import { Hotel, Loader2, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -18,20 +18,31 @@ import { useState } from "react";
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const defaultTab = searchParams.get("type") === "hotel" ? "hotel" : "client";
+
+  const [activeTab, setActiveTab] = useState<"client" | "hotel">(
+    defaultTab as "client" | "hotel",
+  );
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent, type: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isLoading) return; // bloque double clic
+    if (isLoading) return;
 
     setIsLoading(true);
 
+    // Simulation loading
     await new Promise((r) => setTimeout(r, 1000));
 
-    router.replace(`/onboarding?type=${type}`);
+    // Redirection selon le profil actif
+    if (activeTab === "hotel") {
+      router.replace("/onboarding/hotel");
+    } else {
+      router.replace("/dashboard/client");
+    }
   };
 
   return (
@@ -66,7 +77,7 @@ export default function RegisterPage() {
       </div>
 
       {/* RIGHT FORM */}
-      <div className="min-h-screen w-full md:w-1/2 bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen w-full md:w-1/2 bg-background flex items-start md:items-center justify-center p-4 pt-10 md:pt-4">
         <div className="w-full max-w-md">
           {/* MOBILE BACK */}
           <div className="md:hidden mb-4">
@@ -79,15 +90,22 @@ export default function RegisterPage() {
           </div>
 
           <Card className="bg-white">
-            <CardHeader className="text-center">
+            <CardHeader className="text-center space-y-2">
               <CardTitle className="font-serif text-3xl">
                 Créer un compte
               </CardTitle>
+
               <CardDescription>Rejoignez Zua Place</CardDescription>
             </CardHeader>
 
             <CardContent>
-              <Tabs defaultValue={defaultTab} className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) =>
+                  setActiveTab(value as "client" | "hotel")
+                }
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger
                     value="client"
@@ -105,48 +123,120 @@ export default function RegisterPage() {
                     Hôtel
                   </TabsTrigger>
                 </TabsList>
+
                 {/* CLIENT */}
                 <TabsContent value="client">
-                  <form
-                    onSubmit={(e) => handleSubmit(e, "client")}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label>Email</label>
-                      <Input type="email" required />
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nom complet</label>
+
+                      <Input
+                        type="text"
+                        placeholder="John Doe"
+                        className="h-11"
+                        required
+                      />
                     </div>
 
-                    <div>
-                      <label>Mot de passe</label>
-                      <Input type="password" required />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Email</label>
+
+                      <Input
+                        type="email"
+                        placeholder="exemple@gmail.com"
+                        className="h-11"
+                        required
+                      />
                     </div>
 
-                    <Button type="submit" className="w-full">
-                      Continuer
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Numéro de téléphone
+                      </label>
+
+                      <Input
+                        type="tel"
+                        placeholder="+243 900 000 000"
+                        className="h-11"
+                        required
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-11"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Chargement...
+                        </>
+                      ) : (
+                        "Créer un compte"
+                      )}
                     </Button>
                   </form>
                 </TabsContent>
+
                 {/* HOTEL */}
                 <TabsContent value="hotel">
-                  <form
-                    onSubmit={(e) => handleSubmit(e, "hotel")}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label>Email</label>
-                      <Input type="email" required />
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Nom du responable
+                      </label>
+
+                      <Input
+                        type="text"
+                        placeholder="Ex: Hôtel Résidence"
+                        className="h-11"
+                        required
+                      />
                     </div>
 
-                    <div>
-                      <label>Mot de passe</label>
-                      <Input type="password" required />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Email du responable
+                      </label>
+
+                      <Input
+                        type="email"
+                        placeholder="hotel@gmail.com"
+                        className="h-11"
+                        required
+                      />
                     </div>
 
-                    <Button type="submit" className="w-full">
-                      Continuer
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Numéro de téléphone
+                      </label>
+
+                      <Input
+                        type="tel"
+                        placeholder="+243 900 000 000"
+                        className="h-11"
+                        required
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-11"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Chargement...
+                        </>
+                      ) : (
+                        "Continuer"
+                      )}
                     </Button>
                   </form>
-                </TabsContent>{" "}
+                </TabsContent>
               </Tabs>
 
               <div className="mt-6 text-center text-sm text-muted-foreground">

@@ -41,8 +41,8 @@ async function main() {
     if (adminRows.length === 0) {
       const id = `admin-${Date.now()}`;
       await connection.execute(
-        'INSERT INTO User (id, email, username, password, role, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
-        [id, adminEmail, 'admin', hashedAdminPassword, 'ADMIN', 1]
+        'INSERT INTO User (id, email, username, password, role, isActive, isVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+        [id, adminEmail, 'admin', hashedAdminPassword, 'ADMIN', 1, 1]
       );
       console.log(`Admin user created: ${adminEmail}`);
     }
@@ -55,19 +55,13 @@ async function main() {
     const [clientRows]: any = await connection.execute('SELECT id FROM User WHERE email = ?', [clientEmail]);
 
     if (clientRows.length === 0) {
-      const userId = `client-user-${Date.now()}`;
+      const userId = `user-client-${Date.now()}`;
       const clientId = `client-${Date.now()}`;
       
-      // Insert User
+      // Insert User with isVerified = 1
       await connection.execute(
-        'INSERT INTO User (id, email, username, password, role, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
-        [userId, clientEmail, 'client', hashedClientPassword, 'CLIENT', 1]
-      );
-      
-      // Insert Client profile (required by the schema relation)
-      await connection.execute(
-        'INSERT INTO Client (id, name, userId, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, NOW(), NOW())',
-        [clientId, 'Test Client', userId, 1]
+        'INSERT INTO User (id, email, username, password, role, isActive, isVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+        [userId, clientEmail, 'client', hashedClientPassword, 'CLIENT', 1, 1]
       );
       
       console.log(`Client user created: ${clientEmail}`);

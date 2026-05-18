@@ -4,17 +4,22 @@ export class AbonnementService {
   /**
    * Create a new subscription for a hotel
    */
-  static async createAbonnement(hotelId: string, type: string, days: number, price: number) {
+  static async createAbonnement(hotelId: string, planName: string, amount: number, days: number) {
+    const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + days);
 
-    return prisma.abonnement.create({
+    return prisma.subscription.create({
       data: {
         hotelId,
-        type,
+        planName,
+        amount,
+        startDate,
         endDate,
-        price,
-        isActive: true,
+        status: "ACTIVE",
+      },
+      include: {
+        hotel: true,
       },
     });
   }
@@ -23,16 +28,13 @@ export class AbonnementService {
    * Get active subscription for a hotel
    */
   static async getActiveAbonnement(hotelId: string) {
-    return prisma.abonnement.findFirst({
+    return prisma.subscription.findFirst({
       where: {
         hotelId,
-        isActive: true,
-        OR: [
-          { endDate: null },
-          { endDate: { gt: new Date() } }
-        ]
+        status: "ACTIVE",
+        endDate: { gt: new Date() },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -40,11 +42,11 @@ export class AbonnementService {
    * List all subscriptions (Admin only)
    */
   static async getAllAbonnements() {
-    return prisma.abonnement.findMany({
+    return prisma.subscription.findMany({
       include: {
-        hotel: true
+        hotel: true,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   }
 }

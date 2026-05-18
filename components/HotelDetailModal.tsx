@@ -643,16 +643,6 @@ export const HotelDetailModal = () => {
                     simulé validé.
                   </p>
                 </div>
-                {/* 
-                <div className="flex justify-between">
-                  <span>Méthode de paiement</span>
-                  <strong className="text-foreground capitalize">
-                    {paymentMethod
-                      .replace("airtel", "Airtel")
-                      .replace("orange", "Orange")
-                      .replace("mpesa", "M-Pesa")}
-                  </strong>
-                </div> */}
               </div>
 
               {errorMessage && (
@@ -689,7 +679,7 @@ export const HotelDetailModal = () => {
         </div>
 
         {step !== "SUCCESS" && (
-          <div className="relative flex gap-4 justify-between px-6 pb-6">
+          <div className="flex gap-4 justify-between px-6 pb-6">
             <div
               onClick={() => {
                 if (step === "DETAILS") setStep("DETAILS");

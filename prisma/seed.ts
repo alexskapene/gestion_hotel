@@ -1,6 +1,6 @@
-import mysql from 'mysql2/promise';
-import bcrypt from 'bcryptjs';
-import 'dotenv/config';
+import bcrypt from "bcryptjs";
+import "dotenv/config";
+import mysql from "mysql2/promise";
 
 async function main() {
   console.log("Seeding database via direct connection...");
@@ -17,10 +17,12 @@ async function main() {
   const match = dbUrl.match(urlPattern);
 
   if (!match) {
-    throw new Error("Invalid DATABASE_URL format. Expected mysql://user:password@host:port/database or mysql://user@host:port/database");
+    throw new Error(
+      "Invalid DATABASE_URL format. Expected mysql://user:password@host:port/database or mysql://user@host:port/database",
+    );
   }
 
-  const [_, user, password = '', host, port, database] = match;
+  const [_, user, password = "", host, port, database] = match;
 
   const connection = await mysql.createConnection({
     host,
@@ -36,13 +38,16 @@ async function main() {
     const adminPassword = "adminpassword123";
     const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
 
-    const [adminRows]: any = await connection.execute('SELECT id FROM User WHERE email = ?', [adminEmail]);
+    const [adminRows]: any = await connection.execute(
+      "SELECT id FROM User WHERE email = ?",
+      [adminEmail],
+    );
 
     if (adminRows.length === 0) {
       const id = `admin-${Date.now()}`;
       await connection.execute(
-        'INSERT INTO User (id, email, username, password, role, isActive, isVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
-        [id, adminEmail, 'admin', hashedAdminPassword, 'ADMIN', 1, 1]
+        "INSERT INTO User (id, email, username, password, role, isActive, isVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+        [id, adminEmail, "admin", hashedAdminPassword, "ADMIN", 1, 1],
       );
       console.log(`Admin user created: ${adminEmail}`);
     }
@@ -52,18 +57,21 @@ async function main() {
     const clientPassword = "clientpassword123";
     const hashedClientPassword = await bcrypt.hash(clientPassword, 10);
 
-    const [clientRows]: any = await connection.execute('SELECT id FROM User WHERE email = ?', [clientEmail]);
+    const [clientRows]: any = await connection.execute(
+      "SELECT id FROM User WHERE email = ?",
+      [clientEmail],
+    );
 
     if (clientRows.length === 0) {
       const userId = `user-client-${Date.now()}`;
       const clientId = `client-${Date.now()}`;
-      
+
       // Insert User with isVerified = 1
       await connection.execute(
-        'INSERT INTO User (id, email, username, password, role, isActive, isVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
-        [userId, clientEmail, 'client', hashedClientPassword, 'CLIENT', 1, 1]
+        "INSERT INTO User (id, email, username, password, role, isActive, isVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+        [userId, clientEmail, "client", hashedClientPassword, "CLIENT", 1, 1],
       );
-      
+
       console.log(`Client user created: ${clientEmail}`);
     }
   } catch (error) {

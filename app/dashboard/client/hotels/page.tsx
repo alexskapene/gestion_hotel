@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Hotels } from "@/data/mockData";
 import { HotelCard } from "@/components/HotelCard";
+import { Hotels } from "@/data/mockData";
+import { useMemo, useState } from "react";
 
 export default function HotelsPage() {
   const [city, setCity] = useState("Tous");
@@ -30,7 +30,7 @@ export default function HotelsPage() {
           <button
             key={c}
             onClick={() => setCity(c)}
-            className={` flex-1 md:flex-0  px-4 py-2 rounded-full text-sm border transition ${
+            className={` flex-1 md:flex-0  px-4 py-2 text-sm border transition ${
               city === c ? "bg-black text-white" : "bg-white text-black"
             }`}
           >

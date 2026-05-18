@@ -1,20 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  CalendarDays,
-  MapPin,
-  Phone,
-  CheckCircle2,
-  AlertCircle,
-  XCircle,
-  Clock,
-  Eye,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +11,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertCircle,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  Eye,
+  MapPin,
+  Phone,
+  XCircle,
+} from "lucide-react";
+import { useState } from "react";
 
 import { Reservations } from "@/data/mockData";
 import type { Reservation } from "@/types/types";
@@ -38,17 +38,17 @@ const statusConfig: Record<
   confirmed: {
     label: "Confirmé",
     icon: CheckCircle2,
-    class: "bg-primary/10 text-primary",
+    class: "bg-green-500/10 text-green-500",
   },
   pending: {
     label: "En attente",
     icon: AlertCircle,
-    class: "bg-accent/10 text-accent",
+    class: "bg-orange-500/10 text-orange-500",
   },
   completed: {
     label: "Terminé",
     icon: Clock,
-    class: "bg-muted text-muted-foreground",
+    class: "bg-primary/10 text-primary",
   },
   cancelled: {
     label: "Annulé",
@@ -62,7 +62,7 @@ function ReservationCard({ reservation }: { reservation: Reservation }) {
   const StatusIcon = status.icon;
 
   return (
-    <Card className="rounded-2xl overflow-hidden">
+    <Card className=" overflow-hidden">
       <div className="flex flex-col md:flex-row">
         <div
           className="w-full md:w-48 h-40 md:h-auto bg-cover bg-center"
@@ -76,7 +76,7 @@ function ReservationCard({ reservation }: { reservation: Reservation }) {
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-semibold text-lg">{reservation.hotel}</h3>
 
-                  <Badge className={`rounded-full ${status.class}`}>
+                  <Badge className={` ${status.class}`}>
                     <StatusIcon className="w-3 h-3 mr-1" />
                     {status.label}
                   </Badge>
@@ -124,7 +124,10 @@ function ReservationCard({ reservation }: { reservation: Reservation }) {
             <div className="flex sm:flex-col gap-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="rounded-full">
+                  <Button
+                    variant="outline"
+                    className="border-transparent shadow-none"
+                  >
                     <Eye className="w-4 h-4 mr-2" />
                     Détails
                   </Button>
@@ -140,7 +143,7 @@ function ReservationCard({ reservation }: { reservation: Reservation }) {
 
                   <div className="space-y-4">
                     <div
-                      className="w-full h-48 bg-cover rounded-xl"
+                      className="w-full h-48 bg-cover"
                       style={{ backgroundImage: `url(${reservation.image})` }}
                     />
 
@@ -182,11 +185,16 @@ function ReservationCard({ reservation }: { reservation: Reservation }) {
               </Dialog>
 
               {reservation.status === "pending" && (
-                <Button className="rounded-full">Payer</Button>
+                <Button className="bg-transparent shadow-none text-foreground hover:text-green-500 hover:bg-transparent transition-colors">
+                  Payer
+                </Button>
               )}
 
               {reservation.status === "confirmed" && (
-                <Button variant="outline" className="rounded-full">
+                <Button
+                  variant="outline"
+                  className="border-transparent shadow-none hover:text-destructive"
+                >
                   Annuler
                 </Button>
               )}
@@ -213,7 +221,7 @@ export default function ClientReservationsPage() {
       <h2 className="text-2xl font-bold">Mes Réservations</h2>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="rounded-full">
+        <TabsList className="">
           <TabsTrigger value="all">Toutes</TabsTrigger>
           <TabsTrigger value="confirmed">Confirmées</TabsTrigger>
           <TabsTrigger value="pending">En attente</TabsTrigger>

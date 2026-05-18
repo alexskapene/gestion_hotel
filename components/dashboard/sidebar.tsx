@@ -1,28 +1,28 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
-  Hotel,
-  LayoutDashboard,
-  CalendarDays,
+  ArrowLeftRight,
+  BedDouble,
   Birdhouse,
-  User,
-  Settings,
-  LogOut,
+  CalendarDays,
+  CreditCard,
   Heart,
   History,
-  X,
+  Hotel,
+  LayoutDashboard,
+  LogOut,
+  Settings,
   Star,
+  Tags,
+  User,
   Users,
-  BedDouble,
-  CreditCard,
-  ArrowLeftRight,
-  Tags
+  X,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   type: "client" | "hotel" | "admin";
@@ -67,23 +67,53 @@ const hotelMenuItems = [
 const adminMenuItems = [
   { href: "/dashboard/admin", icon: LayoutDashboard, label: "Tableau de Bord" },
   { href: "/dashboard/admin/hotels", icon: Hotel, label: "Gestion Hôtels" },
-  { href: "/dashboard/admin/chambres/categories", icon: Tags, label: "Catégories Chambres"},
-  { href: "/dashboard/admin/chambres", icon: BedDouble, label: "Gestion Chambres"},
-  { href: "/dashboard/admin/reservations", icon: CalendarDays, label: "Gestion Réservations" },
-  { href: "/dashboard/admin/paiements", icon: CreditCard, label: "Gestion Paiements" },
+  {
+    href: "/dashboard/admin/chambres/categories",
+    icon: Tags,
+    label: "Catégories Chambres",
+  },
+  {
+    href: "/dashboard/admin/chambres",
+    icon: BedDouble,
+    label: "Gestion Chambres",
+  },
+  {
+    href: "/dashboard/admin/reservations",
+    icon: CalendarDays,
+    label: "Gestion Réservations",
+  },
+  {
+    href: "/dashboard/admin/paiements",
+    icon: CreditCard,
+    label: "Gestion Paiements",
+  },
   { href: "/dashboard/admin/avis", icon: Star, label: "Gestion Avis" },
-  { href: "/dashboard/admin/abonnements", icon: ArrowLeftRight, label: "Gestion Transactions" },
-  {href: "/dashboard/admin/visiteurs", icon: Users, label: "Gestion Visiteurs"},
-  { href: "/dashboard/admin/utilisateurs", icon: User, label: "Gestion Utilisateurs" },
+  {
+    href: "/dashboard/admin/abonnements",
+    icon: ArrowLeftRight,
+    label: "Gestion Transactions",
+  },
+  {
+    href: "/dashboard/admin/visiteurs",
+    icon: Users,
+    label: "Gestion Visiteurs",
+  },
+  {
+    href: "/dashboard/admin/utilisateurs",
+    icon: User,
+    label: "Gestion Utilisateurs",
+  },
   { href: "/dashboard/admin/parametres", icon: Settings, label: "Paramètres" },
 ];
 
 export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const menuItems = 
-    type === "client" ? clientMenuItems : 
-    type === "hotel" ? hotelMenuItems : 
-    adminMenuItems;
+  const menuItems =
+    type === "client"
+      ? clientMenuItems
+      : type === "hotel"
+        ? hotelMenuItems
+        : adminMenuItems;
 
   return (
     <>
@@ -113,10 +143,7 @@ export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
               style={{ height: "auto" }}
             />
           </Link>
-          <button
-            className="lg:hidden p-2 rounded-full hover:bg-muted"
-            onClick={onClose}
-          >
+          <button className="lg:hidden p-2 hover:bg-muted" onClick={onClose}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -131,7 +158,7 @@ export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-full text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors",
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -149,7 +176,7 @@ export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
           <Button
             asChild
             variant="ghost"
-            className="w-full justify-start rounded-full text-muted-foreground hover:text-white hover:bg-primary transition-colors"
+            className="w-full justify-start text-destructive hover:text-white hover:bg-destructive/10 hover:text-destructive   transition-colors"
           >
             <Link href="/auth/login">
               <LogOut className="w-5 h-5 mr-3" />

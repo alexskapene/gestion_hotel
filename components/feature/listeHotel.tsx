@@ -32,7 +32,7 @@ import { useState } from "react";
 import { Hotels } from "@/data/mockData";
 import { HotelCard } from "../HotelCard";
 
-const cities = ["Toutes", "Nice", "Mahagi", "Aru", "Djugu", "Irumu", "Mambasa"];
+const cities = ["Toutes", "Bunia", "Mahagi", "Aru", "Djugu", "Irumu", "Mambasa"];
 
 // Mapping des icônes basé sur l'ID de l'équipement
 const amenityIcons: Record<string, React.ReactNode> = {

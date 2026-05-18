@@ -28,6 +28,8 @@ function LoginContent() {
     password: "",
   });
 
+  const callbackUrl = searchParams.get("callbackUrl");
+
   const handleSubmit = async (e: React.FormEvent, type: string) => {
     e.preventDefault();
     setIsLoading(true);
@@ -45,6 +47,16 @@ function LoginContent() {
         return;
       }
 
+      if (callbackUrl) {
+        router.push(callbackUrl);
+        return;
+      }
+
+      if (type === "hotel") {
+        router.push("/dashboard/hotel");
+      } else {
+        router.push("/dashboard/client");
+      }
       // Redirect to the dashboard landing page.
       // The dashboard page will forward the user to the correct role-specific dashboard.
       router.push("/dashboard");
@@ -132,6 +144,12 @@ function LoginContent() {
                     Hôtel
                   </TabsTrigger>
                 </TabsList>
+
+                {callbackUrl && (
+                  <p className="text-center text-sm text-destructive my-4 font-semibold ">
+                    Connexion requise pour poursuivre votre réservation.
+                  </p>
+                )}
 
                 {/* CLIENT */}
                 <TabsContent value="client">
@@ -327,11 +345,13 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen w-full flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen w-full flex items-center justify-center">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );

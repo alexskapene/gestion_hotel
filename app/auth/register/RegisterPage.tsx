@@ -95,7 +95,8 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row">
       {/* LEFT IMAGE */}
-      <div className="relative hidden md:flex w-1/2 min-h-screen bg-cover bg-center flex-col"
+      <div
+        className="relative hidden md:flex w-1/2 min-h-screen bg-cover bg-center flex-col"
         style={{ backgroundImage: "url('/room.jpg')" }}
       >
         <div className="absolute inset-0 bg-black/60" />
@@ -123,7 +124,7 @@ export default function RegisterPage() {
       </div>
 
       {/* RIGHT FORM */}
-      <div className="min-h-screen w-full md:w-1/2 bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen w-full md:w-1/2 bg-background flex items-start md:items-center justify-center p-4 pt-10 md:pt-4">
         <div className="w-full max-w-md">
           {/* MOBILE BACK */}
           <div className="md:hidden mb-4">
@@ -135,7 +136,7 @@ export default function RegisterPage() {
             </Link>
           </div>
 
-          <Card className="bg-white border-0 shadow-xl">
+          <Card className="bg-white">
             <CardHeader className="text-center space-y-2">
               <CardTitle className="font-serif text-3xl">
                 Créer un compte
@@ -190,6 +191,7 @@ export default function RegisterPage() {
                       <Input
                         type="email"
                         placeholder="exemple@gmail.com"
+                        className="h-11"
                         required
                         value={clientForm.email}
                         onChange={(e) => setClientForm((p) => ({ ...p, email: e.target.value }))}
@@ -225,7 +227,7 @@ export default function RegisterPage() {
                           Chargement...
                         </>
                       ) : (
-                        "Continuer"
+                        "Créer un compte"
                       )}
                     </Button>
                   </form>
@@ -249,8 +251,9 @@ export default function RegisterPage() {
                       <label className="text-sm font-medium">Email professionnel</label>
 
                       <Input
-                        type="email"
-                        placeholder="hotel@gmail.com"
+                        type="text"
+                        placeholder="Ex: Hôtel Résidence"
+                        className="h-11"
                         required
                         value={hotelForm.email}
                         onChange={(e) => setHotelForm((p) => ({ ...p, email: e.target.value }))}

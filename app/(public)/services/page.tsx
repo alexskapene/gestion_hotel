@@ -219,8 +219,6 @@ export default function ServicesPage() {
         </section>
         {/* HOTELIERS SERVICES */}
         <section className="py-28 bg-muted/30 relative overflow-hidden">
-          <div className="absolute right-0 bottom-0 w-96 h-96 bg-primary/10 blur-3xl rounded-full" />
-
           <div className="container mx-auto px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center space-y-5 mb-20">
               <h2 className="font-serif text-3xl md:text-5xl font-bold">
@@ -233,9 +231,9 @@ export default function ServicesPage() {
               </p>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div className="grid lg:grid-cols-2  gap-10 items-center">
               {/* BIG CARD */}
-              <div className="relative overflow-hidden min-h-[550px] border border-border/50">
+              <div className="relative  overflow-hidden min-h-[550px] border border-border/50">
                 <Image
                   src="/room.jpg"
                   alt="Hotel Dashboard"

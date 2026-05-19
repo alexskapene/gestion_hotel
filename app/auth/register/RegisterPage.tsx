@@ -14,6 +14,7 @@ import { Hotel, Loader2, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -27,21 +28,67 @@ export default function RegisterPage() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Client form state
+  const [clientForm, setClientForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+  });
+
+  // Hotel owner form state (manager only)
+  const [hotelForm, setHotelForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (isLoading) return;
-
     setIsLoading(true);
 
-    // Simulation loading
-    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      let payload: any = {};
 
-    // Redirection selon le profil actif
-    if (activeTab === "hotel") {
-      router.replace("/dashboard/hotel");
-    } else {
-      router.replace("/dashboard/client");
+      if (activeTab === "client") {
+        payload = {
+          email: clientForm.email,
+          password: clientForm.password,
+          username: clientForm.username,
+          role: "CLIENT",
+        };
+      } else {
+        payload = {
+          email: hotelForm.email,
+          password: hotelForm.password,
+          username: hotelForm.username,
+          role: "HOTEL_OWNER",
+        };
+      }
+
+      const res = await fetch(`/api/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || "Erreur lors de la création du compte");
+      }
+
+      toast.success("Compte créé avec succès");
+
+      const type = activeTab === "hotel" ? "hotel" : "client";
+      router.replace(`/onboarding?type=${type}`);
+    } catch (err: any) {
+      console.error("Register error:", err);
+      toast.error(err?.message || "Impossible de créer le compte");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -127,28 +174,51 @@ export default function RegisterPage() {
                 <TabsContent value="client">
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
+                      <label className="text-sm font-medium">Nom d'utilisateur</label>
+                      <Input
+                        type="text"
+                        placeholder="votre nom ou pseudo"
+                        required
+                        value={clientForm.username}
+                        onChange={(e) => setClientForm((p) => ({ ...p, username: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <label className="text-sm font-medium">Email</label>
 
                       <Input
                         type="email"
                         placeholder="exemple@gmail.com"
                         required
+                        value={clientForm.email}
+                        onChange={(e) => setClientForm((p) => ({ ...p, email: e.target.value }))}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Mot de passe
-                      </label>
+                      <label className="text-sm font-medium">Mot de passe</label>
 
-                      <Input type="password" placeholder="••••••••" required />
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                        value={clientForm.password}
+                        onChange={(e) => setClientForm((p) => ({ ...p, password: e.target.value }))}
+                      />
                     </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full h-11"
-                      disabled={isLoading}
-                    >
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Téléphone (optionnel)</label>
+                      <Input
+                        type="text"
+                        placeholder="+243..."
+                        value={clientForm.phone}
+                        onChange={(e) => setClientForm((p) => ({ ...p, phone: e.target.value }))}
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full h-11" disabled={isLoading}>
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -165,30 +235,41 @@ export default function RegisterPage() {
                 <TabsContent value="hotel">
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Email professionnel
-                      </label>
+                      <label className="text-sm font-medium">Nom du gérant (utilisateur)</label>
+                      <Input
+                        type="text"
+                        placeholder="Nom ou pseudo du gérant"
+                        required
+                        value={hotelForm.username}
+                        onChange={(e) => setHotelForm((p) => ({ ...p, username: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Email professionnel</label>
 
                       <Input
                         type="email"
                         placeholder="hotel@gmail.com"
                         required
+                        value={hotelForm.email}
+                        onChange={(e) => setHotelForm((p) => ({ ...p, email: e.target.value }))}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Mot de passe
-                      </label>
+                      <label className="text-sm font-medium">Mot de passe</label>
 
-                      <Input type="password" placeholder="••••••••" required />
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                        value={hotelForm.password}
+                        onChange={(e) => setHotelForm((p) => ({ ...p, password: e.target.value }))}
+                      />
                     </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full h-11"
-                      disabled={isLoading}
-                    >
+                    <Button type="submit" className="w-full h-11" disabled={isLoading}>
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -3,16 +3,35 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSession } from "next-auth/react";
 import { Loader2, User, Hotel } from "lucide-react";
+import { toast } from "sonner";
 
 function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
 
   const type = searchParams.get("type") === "hotel" ? "hotel" : "client";
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const userId = (session?.user as any)?.id as string | undefined;
+
+  useEffect(() => {
+    if (status !== "loading" && !userId) {
+      router.replace("/auth/login");
+    }
+  }, [status, userId, router]);
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const [clientData, setClientData] = useState({
     name: "",
@@ -32,12 +51,51 @@ function OnboardingContent() {
     if (isLoading) return;
     setIsLoading(true);
 
-    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      if (!userId) {
+        throw new Error("Utilisateur non connecté");
+      }
 
-    if (type === "hotel") {
-      router.replace("/dashboard/hotel");
-    } else {
-      router.replace("/dashboard/client");
+      if (type === "hotel") {
+        const res = await fetch("/api/hotels", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            name: hotelData.hotelName,
+            phone: hotelData.phone,
+            city: hotelData.city,
+            address: hotelData.address,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || "Erreur lors de la création de l'hôtel");
+        }
+      } else {
+        const res = await fetch(`/api/users/${userId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: clientData.name,
+            phone: clientData.phone,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || "Erreur lors de la mise à jour du profil");
+        }
+      }
+
+      toast.success("Onboarding complété avec succès");
+      router.replace("/dashboard");
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible de terminer l'onboarding");
+      console.error("Onboarding error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

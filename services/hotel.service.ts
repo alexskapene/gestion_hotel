@@ -1,16 +1,38 @@
 import prisma from "@/lib/prisma";
 
+const toSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+
 export class HotelService {
   /**
-   * Create or update hotel details
+   * Create or update hotel details for a given owner.
    */
   static async upsertHotel(userId: string, data: any) {
-    return prisma.hotel.upsert({
-      where: { userId },
-      update: data,
-      create: {
-        userId,
-        ...data,
+    const hotelData: any = {
+      ...data,
+      slug: data.slug || (data.name ? toSlug(data.name) : `hotel-${Date.now()}`),
+    };
+
+    const existingHotel = await prisma.hotel.findFirst({
+      where: { ownerId: userId },
+    });
+
+    if (existingHotel) {
+      return prisma.hotel.update({
+        where: { id: existingHotel.id },
+        data: hotelData,
+      });
+    }
+
+    return prisma.hotel.create({
+      data: {
+        ownerId: userId,
+        ...hotelData,
       },
     });
   }

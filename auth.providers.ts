@@ -17,8 +17,12 @@ export const providers = [
           credentials.password as string
         );
         return user;
-      } catch (error) {
-        return null;
+      } catch (error: any) {
+        // Rethrow with a consistent prefix so server logs show the formatted message
+        const msg = (error && error.message) ? error.message : String(error);
+        const formatted = `[AUTH_ERROR]: ${msg}`;
+        console.error(formatted);
+        throw new Error(formatted);
       }
     }
   })

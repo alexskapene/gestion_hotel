@@ -43,6 +43,7 @@ function OnboardingContent() {
     city: "",
     address: "",
     phone: "",
+    country: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,7 +66,9 @@ function OnboardingContent() {
             name: hotelData.hotelName,
             phone: hotelData.phone,
             city: hotelData.city,
+            country: hotelData.country,
             address: hotelData.address,
+            hotelType: "HOTEL",
           }),
         });
 
@@ -90,7 +93,8 @@ function OnboardingContent() {
       }
 
       toast.success("Onboarding complété avec succès");
-      router.replace("/dashboard");
+      const destination = type === "hotel" ? "/dashboard/hotel" : "/dashboard/client";
+      router.replace(destination);
     } catch (error: any) {
       toast.error(error?.message || "Impossible de terminer l'onboarding");
       console.error("Onboarding error:", error);
@@ -198,6 +202,21 @@ function OnboardingContent() {
                     setHotelData({
                       ...hotelData,
                       city: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Pays</label>
+                <Input
+                  placeholder="RDC"
+                  value={hotelData.country}
+                  onChange={(e) =>
+                    setHotelData({
+                      ...hotelData,
+                      country: e.target.value,
                     })
                   }
                   required

@@ -31,6 +31,22 @@ export class UserService {
   }
 
   /**
+   * Get user by email (used for auth checks)
+   */
+  static async getUserByEmail(email: string) {
+    return prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        isVerified: true,
+        role: true,
+      },
+    });
+  }
+
+  /**
    * Get user by ID with relations.
    */
   static async getUserById(id: string) {

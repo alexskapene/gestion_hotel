@@ -28,18 +28,26 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { isActive } = body;
 
-    if (typeof isActive !== "boolean") {
-      return NextResponse.json({ error: "isActive must be a boolean" }, { status: 400 });
+    if (typeof body.isActive === "boolean") {
+      const user = await UserService.updateStatus(id, body.isActive);
+      return NextResponse.json(user);
     }
 
-    const user = await UserService.updateStatus(id, isActive);
+    const updateData: any = {};
+    if (typeof body.username === "string") updateData.username = body.username;
+    if (typeof body.phone === "string") updateData.phone = body.phone;
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "Aucun champ valide à mettre à jour" }, { status: 400 });
+    }
+
+    const user = await UserService.updateUserProfile(id, updateData);
     return NextResponse.json(user);
   } catch (error) {
     const { id } = await params;
     console.error(`PATCH /api/users/${id} error:`, error);
-    return NextResponse.json({ error: "Failed to update user status" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }
 }
 

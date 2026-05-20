@@ -78,8 +78,10 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
     amenities: initialAmenities,
   });
 
+  const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
   const [imagesInput, setImagesInput] = useState(initialImages.join(", "));
   const [amenitiesInput, setAmenitiesInput] = useState(initialAmenities.join(", "));
+  const [amenitiesList, setAmenitiesList] = useState<string[]>(initialAmenities);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -99,10 +101,7 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
-        amenities: amenitiesInput
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
+        amenities: amenitiesList,
       };
 
       const res = await fetch("/api/hotels/me", {
@@ -246,7 +245,14 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
 
       <div>
         <label className="text-sm font-medium">Images (séparées par des virgules) — ou téléversez ci-dessous</label>
-        <Input value={imagesInput} onChange={(e) => setImagesInput(e.target.value)} />
+        <Input
+          value={imagesInput}
+          onChange={(e) => {
+            const value = e.target.value;
+            setImagesInput(value);
+            setImageUrls(value.split(",").map((s) => s.trim()).filter(Boolean));
+          }}
+        />
       </div>
 
       <div>
@@ -267,7 +273,8 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
               if (!res.ok) throw new Error("Upload failed");
               const data = await res.json();
               if (data && Array.isArray(data.urls)) {
-                const combined = [...(imagesInput ? imagesInput.split(",").map(s=>s.trim()).filter(Boolean) : []), ...data.urls];
+                const combined = [...imageUrls, ...data.urls];
+                setImageUrls(combined);
                 setImagesInput(combined.join(", "));
               }
             } catch (err: any) {
@@ -283,15 +290,51 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
 
         {/* Preview */}
         <div className="flex gap-2 mt-2 flex-wrap">
-          {imagesInput.split(",").map((src) => src.trim()).filter(Boolean).map((src, i) => (
-            <img key={i} src={src} alt={`img-${i}`} className="w-24 h-16 object-cover rounded-md" />
+          {imageUrls.map((src, i) => (
+            <div key={i} className="relative w-24 h-16">
+              <img src={src} alt={`img-${i}`} className="w-full h-full object-cover rounded-md" />
+              <button
+                type="button"
+                onClick={() => {
+                  const nextUrls = imageUrls.filter((_, index) => index !== i);
+                  setImageUrls(nextUrls);
+                  setImagesInput(nextUrls.join(", "));
+                }}
+                className="absolute top-1 right-1 rounded-full bg-black/70 text-white text-xs px-2 py-1"
+              >
+                Supprimer
+              </button>
+            </div>
           ))}
         </div>
       </div>
 
       <div>
         <label className="text-sm font-medium">Commodités / équipements (séparés par des virgules)</label>
-        <Input value={amenitiesInput} onChange={(e) => setAmenitiesInput(e.target.value)} />
+        <Input
+          value={amenitiesInput}
+          onChange={(e) => {
+            const value = e.target.value;
+            setAmenitiesInput(value);
+            setAmenitiesList(value.split(",").map((item) => item.trim()).filter(Boolean));
+          }}
+        />
+        <div className="flex flex-wrap gap-2 mt-2">
+          {amenitiesList.map((amenity, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => {
+                const nextAmenities = amenitiesList.filter((_, idx) => idx !== index);
+                setAmenitiesList(nextAmenities);
+                setAmenitiesInput(nextAmenities.join(", "));
+              }}
+              className="rounded-full border border-muted px-3 py-1 text-sm text-foreground hover:bg-muted"
+            >
+              {amenity} ×
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex items-center gap-4">

@@ -18,7 +18,7 @@ export default function HotelDashboardLayout({
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
       />
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen lg:pl-72">
         <DashboardHeader 
           title="Espace Hôtel" 
           userName="Hôtel Ituri Palace" 

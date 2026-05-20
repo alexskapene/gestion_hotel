@@ -74,14 +74,14 @@ const roomOccupancy = [
 
 export default function HotelDashboardPage() {
   return (
-    <div className="space-y-6">
+    <div  className="space-y-8 animate-in fade-in duration-500">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+          <h2 className="text-3xl font-serif font-bold text-foreground">
             Tableau de Bord
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             Bienvenue sur votre espace de gestion
           </p>
         </div>

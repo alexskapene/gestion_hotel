@@ -128,7 +128,7 @@ export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-  z-50 h-full w-72 bg-card border-r border-border  flex flex-col transition-transform duration-300 lg:translate-x-0",
+          "fixed top-0 z-50 h-full w-72 bg-card border-r border-border flex flex-col transition-transform duration-300 lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >

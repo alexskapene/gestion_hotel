@@ -30,7 +30,7 @@ export function DashboardHeader({
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 md:px-6 bg-card/95 backdrop-blur border-b border-border lg:ml-72 transition-all">
+      <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 md:px-6 bg-card/95 backdrop-blur border-b border-border transition-all">
       <div className="flex items-center gap-4">
         <button
           className="lg:hidden p-2 rounded-full hover:bg-muted"

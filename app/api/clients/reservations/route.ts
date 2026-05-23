@@ -14,10 +14,14 @@ export const GET = auth(async (req) => {
     const userId = req.auth.user.id as string;
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") || undefined;
+    const search = searchParams.get("search") || undefined;
 
     const reservations = await ClientReservationService.getClientReservations(
       userId,
-      status as any
+      {
+        status: status as any,
+        search: search || undefined,
+      }
     );
 
     return NextResponse.json(reservations);

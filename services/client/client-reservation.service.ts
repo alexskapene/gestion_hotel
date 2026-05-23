@@ -3,13 +3,26 @@ import { BookingStatus } from "@prisma/client";
 
 export class ClientReservationService {
   /**
-   * Récupérer toutes les réservations du client authentifié
+   * Récupérer toutes les réservations du client avec filtrage
    */
-  static async getClientReservations(userId: string, status?: BookingStatus) {
+  static async getClientReservations(
+    userId: string,
+    params: { status?: BookingStatus; search?: string } = {}
+  ) {
+    const { status, search } = params;
+
     return prisma.reservation.findMany({
       where: {
         userId,
         ...(status && { status }),
+        ...(search && {
+          OR: [
+            { id: { contains: search, mode: "insensitive" } },
+            { room: { title: { contains: search, mode: "insensitive" } } },
+            { room: { hotel: { name: { contains: search, mode: "insensitive" } } } },
+            { room: { hotel: { city: { contains: search, mode: "insensitive" } } } },
+          ],
+        }),
       },
       include: {
         room: {
@@ -19,6 +32,8 @@ export class ClientReservationService {
                 id: true,
                 name: true,
                 city: true,
+                address: true,
+                phone: true,
                 logo: true,
                 coverImage: true,
               },
@@ -93,8 +108,11 @@ export class ClientReservationService {
    * Récupérer une réservation par ID
    */
   static async getReservationById(reservationId: string, userId: string) {
-    return prisma.reservation.findUnique({
-      where: { id: reservationId },
+    return prisma.reservation.findFirst({
+      where: {
+        id: reservationId,
+        userId,
+      },
       include: {
         room: {
           include: {

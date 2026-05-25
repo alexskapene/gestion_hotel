@@ -21,6 +21,12 @@ interface DashboardHeaderProps {
   onMenuClick?: () => void;
 }
 
+const logoutCallbackUrls: Record<DashboardHeaderProps["userType"], string> = {
+  client: "/auth/login",
+  hotel: "/auth/login",
+  admin: "/admin/auth/login",
+};
+
 export function DashboardHeader({
   title,
   userName,
@@ -133,7 +139,9 @@ export function DashboardHeader({
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: "/admin/auth/login" })}
+              onClick={() =>
+                signOut({ callbackUrl: logoutCallbackUrls[userType] })
+              }
               className="text-destructive focus:text-destructive cursor-pointer py-2.5"
             >
               <LogOut className="w-4 h-4 mr-3" />

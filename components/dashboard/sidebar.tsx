@@ -23,6 +23,13 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
+
+const logoutCallbackUrls: Record<SidebarProps["type"], string> = {
+  client: "/auth/login",
+  hotel: "/auth/login",
+  admin: "/admin/auth/login",
+};
 
 interface SidebarProps {
   type: "client" | "hotel" | "admin";
@@ -173,14 +180,14 @@ export function DashboardSidebar({ type, isOpen, onClose }: SidebarProps) {
         {/* Footer */}
         <div className="p-4 border-t border-border">
           <Button
-            asChild
             variant="ghost"
-            className="w-full justify-start text-destructive hover:text-white hover:bg-destructive/10 hover:text-destructive   transition-colors"
+            className="w-full justify-start text-destructive hover:text-white hover:bg-destructive/10 hover:text-destructive transition-colors"
+            onClick={() =>
+              signOut({ callbackUrl: logoutCallbackUrls[type] })
+            }
           >
-            <Link href="/auth/login">
-              <LogOut className="w-5 h-5 mr-3" />
-              Déconnexion
-            </Link>
+            <LogOut className="w-5 h-5 mr-3" />
+            Déconnexion
           </Button>
         </div>
       </aside>

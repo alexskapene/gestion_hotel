@@ -49,7 +49,6 @@ const clientMenuItems = [
   { href: "/dashboard/client/favorites", icon: Heart, label: "Favoris" },
   { href: "/dashboard/client/history", icon: History, label: "Historique" },
   { href: "/dashboard/client/profile", icon: User, label: "Mon Profil" },
-  { href: "/dashboard/client/settings", icon: Settings, label: "Paramètres" },
 ];
 
 const hotelMenuItems = [

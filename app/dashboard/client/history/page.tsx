@@ -6,18 +6,18 @@ import { redirect } from "next/navigation";
 import { ClientReservationCard } from "@/components/dashboard/ClientReservationCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Loader2, AlertTriangle } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  History,
+  Loader2,
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-const statusLabels: Record<string, string> = {
-  CONFIRMED: "Confirmée",
-  PENDING: "En attente",
-  COMPLETED: "Terminée",
-  CANCELLED: "Annulée",
-};
-
-export default function ClientReservationsPage() {
+export default function ClientHistoryPage() {
   const { data: session, status } = useSession();
-  const [activeTab, setActiveTab] = useState<"ALL" | string>("ALL");
+  const [activeTab, setActiveTab] = useState("ALL");
   const [reservations, setReservations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,25 +28,22 @@ export default function ClientReservationsPage() {
     }
 
     if (session?.user?.id) {
-      fetchReservations();
+      fetchHistory();
     }
   }, [session, status, activeTab]);
 
-  const fetchReservations = async () => {
+  const fetchHistory = async () => {
     try {
       setIsLoading(true);
       const params = new URLSearchParams();
-
       if (activeTab !== "ALL") {
         params.set("status", activeTab);
       }
 
-      const response = await fetch(
-        `/api/clients/reservations?${params.toString()}`
-      );
+      const response = await fetch(`/api/clients/history?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error("Erreur lors du chargement des réservations");
+        throw new Error("Erreur lors du chargement de l'historique");
       }
 
       const data = await response.json();
@@ -62,13 +59,14 @@ export default function ClientReservationsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">
-          Mes Réservations
+        <h1 className="text-3xl font-serif font-bold text-foreground flex items-center gap-2">
+          <History className="w-8 h-8 text-primary" />
+          Historique
         </h1>
         <p className="text-muted-foreground mt-1">
-          Gérez et consultez toutes vos réservations d'hôtels
+          Retrouvez tous vos séjours passés et réservations terminées.
         </p>
       </div>
 
@@ -85,9 +83,7 @@ export default function ClientReservationsPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="ALL">Toutes</TabsTrigger>
-          <TabsTrigger value="CONFIRMED">Confirmées</TabsTrigger>
-          <TabsTrigger value="PENDING">En attente</TabsTrigger>
+          <TabsTrigger value="ALL">Tous</TabsTrigger>
           <TabsTrigger value="COMPLETED">Terminées</TabsTrigger>
           <TabsTrigger value="CANCELLED">Annulées</TabsTrigger>
         </TabsList>
@@ -103,18 +99,23 @@ export default function ClientReservationsPage() {
                 <ClientReservationCard
                   key={reservation.id}
                   reservation={reservation}
+                  showActions={false}
                 />
               ))}
             </div>
           ) : (
             <Card>
-              <CardContent className="pt-6 text-center">
-                <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <CardContent className="pt-6 text-center space-y-4">
+                <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto" />
                 <p className="text-muted-foreground">
-                  Aucune réservation{" "}
-                  {activeTab !== "ALL" &&
-                    `avec le statut "${statusLabels[activeTab] || activeTab}"`}
+                  Aucun séjour dans votre historique
+                  {activeTab !== "ALL" ? " pour ce filtre" : ""}.
                 </p>
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/client/hotels">
+                    Parcourir les hôtels
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           )}

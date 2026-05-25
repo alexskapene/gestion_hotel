@@ -105,6 +105,57 @@ export class ClientReservationService {
   }
 
   /**
+   * Historique des séjours passés (réservations terminées ou passées)
+   */
+  static async getReservationHistory(
+    userId: string,
+    params: { status?: BookingStatus } = {}
+  ) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return prisma.reservation.findMany({
+      where: {
+        userId,
+        ...(params.status
+          ? { status: params.status }
+          : {
+              OR: [
+                { checkOut: { lt: today } },
+                {
+                  status: {
+                    in: [BookingStatus.COMPLETED, BookingStatus.CANCELLED],
+                  },
+                },
+              ],
+            }),
+      },
+      include: {
+        room: {
+          include: {
+            hotel: {
+              select: {
+                id: true,
+                name: true,
+                city: true,
+                address: true,
+                phone: true,
+                logo: true,
+                coverImage: true,
+              },
+            },
+            images: {
+              take: 1,
+            },
+          },
+        },
+        payments: true,
+      },
+      orderBy: { checkOut: "desc" },
+    });
+  }
+
+  /**
    * Récupérer une réservation par ID
    */
   static async getReservationById(reservationId: string, userId: string) {

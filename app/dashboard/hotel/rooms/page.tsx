@@ -1,25 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import AddRoomModal from "@/components/dashboard/AddRoomModal"
 import { 
   Plus, 
   Search, 
   BedDouble, 
   Users, 
   DollarSign,
-  Wifi,
-  Car,
-  Coffee,
-  Tv,
-  Wind,
   Edit,
   Trash2,
-  MoreVertical
+  MoreVertical,
+  Loader2
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -27,266 +26,276 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { toast } from "sonner"
 
-const rooms = [
-  {
-    id: 1,
-    number: "301",
-    type: "Suite Deluxe",
-    price: 85,
-    capacity: 2,
-    status: "available",
-    amenities: ["wifi", "tv", "ac", "parking"],
-    image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400&h=300&fit=crop",
-    description: "Suite spacieuse avec vue sur la ville, lit king size et salle de bain privée.",
-  },
-  {
-    id: 2,
-    number: "302",
-    type: "Suite Deluxe",
-    price: 85,
-    capacity: 2,
-    status: "occupied",
-    amenities: ["wifi", "tv", "ac", "parking"],
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
-    description: "Suite spacieuse avec vue sur la ville, lit king size et salle de bain privée.",
-  },
-  {
-    id: 3,
-    number: "205",
-    type: "Chambre Double",
-    price: 65,
-    capacity: 2,
-    status: "available",
-    amenities: ["wifi", "tv", "ac"],
-    image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
-    description: "Chambre confortable avec deux lits simples ou un lit double.",
-  },
-  {
-    id: 4,
-    number: "206",
-    type: "Chambre Double",
-    price: 65,
-    capacity: 2,
-    status: "maintenance",
-    amenities: ["wifi", "tv", "ac"],
-    image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=300&fit=crop",
-    description: "Chambre confortable avec deux lits simples ou un lit double.",
-  },
-  {
-    id: 5,
-    number: "102",
-    type: "Chambre Simple",
-    price: 40,
-    capacity: 1,
-    status: "occupied",
-    amenities: ["wifi", "tv"],
-    image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop",
-    description: "Chambre économique idéale pour les voyageurs seuls.",
-  },
-  {
-    id: 6,
-    number: "401",
-    type: "Suite Premium",
-    price: 120,
-    capacity: 4,
-    status: "available",
-    amenities: ["wifi", "tv", "ac", "parking", "restaurant"],
-    image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=300&fit=crop",
-    description: "Notre meilleure suite avec salon séparé, jacuzzi et service VIP.",
-  },
-]
-
-const amenityIcons: Record<string, React.ReactNode> = {
-  wifi: <Wifi className="w-3 h-3" />,
-  tv: <Tv className="w-3 h-3" />,
-  ac: <Wind className="w-3 h-3" />,
-  parking: <Car className="w-3 h-3" />,
-  restaurant: <Coffee className="w-3 h-3" />,
-}
-
-const statusConfig = {
-  available: { label: "Disponible", class: "bg-primary/10 text-primary" },
-  occupied: { label: "Occupée", class: "bg-accent/10 text-accent" },
-  maintenance: { label: "Maintenance", class: "bg-destructive/10 text-destructive" },
+interface Room {
+  id: string
+  roomNumber: string
+  title: string
+  description: string
+  price: number
+  capacity: number
+  bedCount?: number
+  bathroomCount?: number
+  size?: number
+  status: string
+  isActive: boolean
+  category: {
+    name: string
+  }
+  images: any[]
+  amenities: any[]
+  reservations: any[]
 }
 
 export default function HotelRoomsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
-  const [filterType, setFilterType] = useState("all")
+  const { data: session, status } = useSession()
+  const [rooms, setRooms] = useState<Room[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [refreshKey, setRefreshKey] = useState(0)
 
-  const filteredRooms = rooms.filter(room => {
-    const matchesSearch = room.number.includes(searchQuery) || 
-                          room.type.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = filterStatus === "all" || room.status === filterStatus
-    const matchesType = filterType === "all" || room.type === filterType
-    return matchesSearch && matchesStatus && matchesType
-  })
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      redirect("/auth/login")
+    }
 
-  const roomTypes = [...new Set(rooms.map(r => r.type))]
+    if (session?.user?.id) {
+      fetchRooms()
+    }
+  }, [session, status, refreshKey])
+
+  const fetchRooms = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/hotels/rooms", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors du chargement des chambres")
+      }
+
+      const data = await response.json()
+      setRooms(data.rooms || [])
+      setCategories(data.categories || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteRoom = async (roomId: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette chambre ?")) return
+
+    try {
+      const response = await fetch(`/api/rooms/${roomId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la suppression")
+      }
+
+      toast.success("Chambre supprimée avec succès")
+      setRefreshKey((prev) => prev + 1)
+    } catch (error) {
+      toast.error("Erreur lors de la suppression de la chambre")
+      console.error(error)
+    }
+  }
+
+  const filteredRooms = rooms.filter((room) =>
+    room.roomNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    room.title.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, { label: string; className: string }> = {
+      AVAILABLE: { label: "Disponible", className: "bg-green-100 text-green-800" },
+      OCCUPIED: { label: "Occupée", className: "bg-blue-100 text-blue-800" },
+      MAINTENANCE: { label: "Maintenance", className: "bg-yellow-100 text-yellow-800" },
+    }
+    const config = statusMap[status] || { label: status, className: "bg-gray-100 text-gray-800" }
+    return <Badge className={config.className}>{config.label}</Badge>
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="h-10 bg-muted rounded animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-64 bg-muted rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <p className="text-destructive font-semibold mb-4">{error}</p>
+          <Button onClick={() => setRefreshKey((prev) => prev + 1)}>Réessayer</Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-300">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="font-serif text-2xl font-bold">Gestion des Chambres</h2>
-          <p className="text-muted-foreground">
-            {rooms.length} chambres au total - {rooms.filter(r => r.status === "available").length} disponibles
+          <h2 className="text-3xl font-serif font-bold text-foreground">
+            Mes Chambres
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            Gérez vos chambres et leurs tarifs
           </p>
         </div>
-        <Button asChild className="rounded-full w-fit">
-          <Link href="/dashboard/hotel/rooms/new">
-            <Plus className="w-4 h-4 mr-2" />
-            Ajouter une Chambre
-          </Link>
-        </Button>
+        {categories.length > 0 && (
+          <AddRoomModal
+            categories={categories}
+            hotelId=""
+            onRoomAdded={() => setRefreshKey((prev) => prev + 1)}
+          />
+        )}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher par numéro ou type..."
-            className="rounded-full pl-11"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full sm:w-40 rounded-full">
-            <SelectValue placeholder="Statut" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="available">Disponible</SelectItem>
-            <SelectItem value="occupied">Occupée</SelectItem>
-            <SelectItem value="maintenance">Maintenance</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-full sm:w-48 rounded-full">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les types</SelectItem>
-            {roomTypes.map(type => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Rechercher par numéro ou titre..."
+          className="pl-10"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {/* Rooms Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredRooms.map((room) => {
-          const status = statusConfig[room.status as keyof typeof statusConfig]
-          return (
-            <Card key={room.id} className="rounded-2xl overflow-hidden group">
-              <div className="relative">
-                <div 
-                  className="h-48 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${room.image})` }}
-                />
-                <Badge className={`absolute top-4 left-4 rounded-full ${status.class}`}>
-                  {status.label}
-                </Badge>
-                <div className="absolute top-4 right-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="secondary" className="rounded-full w-8 h-8">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg">{room.type}</h3>
-                    <p className="text-sm text-muted-foreground">Chambre {room.number}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-serif text-xl font-bold text-primary">${room.price}</p>
-                    <p className="text-xs text-muted-foreground">/nuit</p>
-                  </div>
-                </div>
-
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {room.description}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="w-4 h-4" />
-                    <span>{room.capacity} personne(s)</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {room.amenities.map((amenity) => (
-                      <div
-                        key={amenity}
-                        className="w-6 h-6 rounded-full bg-muted flex items-center justify-center"
-                        title={amenity}
-                      >
-                        {amenityIcons[amenity]}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" className="flex-1 rounded-full" size="sm">
-                    <Edit className="w-4 h-4 mr-2" />
-                    Modifier
-                  </Button>
-                  {room.status === "available" && (
-                    <Button className="flex-1 rounded-full bg-primary" size="sm">
-                      Marquer Occupée
-                    </Button>
+      {filteredRooms.length === 0 ? (
+        <Card className="rounded-2xl">
+          <CardContent className="p-12 text-center">
+            <BedDouble className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground mb-4">Aucune chambre trouvée</p>
+            {categories.length > 0 && (
+              <AddRoomModal
+                categories={categories}
+                hotelId=""
+                onRoomAdded={() => setRefreshKey((prev) => prev + 1)}
+              />
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredRooms.map((room) => (
+            <Card key={room.id} className="rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+              <CardContent className="p-0">
+                {/* Room Image Placeholder */}
+                <div className="bg-gradient-to-br from-slate-100 to-slate-200 h-40 flex items-center justify-center relative">
+                  {room.images.length > 0 ? (
+                    <img
+                      src={room.images[0]?.imageUrl}
+                      alt={room.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <BedDouble className="w-12 h-12 text-muted-foreground" />
                   )}
-                  {room.status === "occupied" && (
-                    <Button className="flex-1 rounded-full bg-accent text-accent-foreground" size="sm">
-                      Libérer
-                    </Button>
+                  <div className="absolute top-2 right-2">
+                    {getStatusBadge(room.status)}
+                  </div>
+                </div>
+
+                {/* Room Info */}
+                <div className="p-4 space-y-3">
+                  {/* Header */}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Chambre {room.roomNumber}</p>
+                      <h3 className="text-lg font-semibold">{room.title}</h3>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/dashboard/hotel/rooms/${room.id}`}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Éditer
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => handleDeleteRoom(room.id)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Supprimer
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Category */}
+                  <p className="text-sm text-muted-foreground">
+                    {room.category?.name}
+                  </p>
+
+                  {/* Description */}
+                  {room.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {room.description}
+                    </p>
+                  )}
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t">
+                    <div className="text-center">
+                      <Users className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
+                      <p className="text-xs font-medium">{room.capacity}</p>
+                      <p className="text-xs text-muted-foreground">personnes</p>
+                    </div>
+                    <div className="text-center">
+                      <BedDouble className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
+                      <p className="text-xs font-medium">{room.bedCount || "-"}</p>
+                      <p className="text-xs text-muted-foreground">lits</p>
+                    </div>
+                    <div className="text-center">
+                      <DollarSign className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
+                      <p className="text-xs font-medium">${room.price}</p>
+                      <p className="text-xs text-muted-foreground">/nuit</p>
+                    </div>
+                  </div>
+
+                  {/* Reservations */}
+                  {room.reservations.length > 0 && (
+                    <div className="pt-2 border-t">
+                      <p className="text-xs text-muted-foreground">
+                        {room.reservations.length} réservation(s)
+                      </p>
+                    </div>
                   )}
                 </div>
               </CardContent>
             </Card>
-          )
-        })}
-      </div>
-
-      {filteredRooms.length === 0 && (
-        <Card className="rounded-2xl">
-          <CardContent className="py-12 text-center">
-            <BedDouble className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Aucune chambre trouvée</h3>
-            <p className="text-muted-foreground">
-              Aucune chambre ne correspond à vos critères de recherche.
-            </p>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
       )}
     </div>
   )
 }
+

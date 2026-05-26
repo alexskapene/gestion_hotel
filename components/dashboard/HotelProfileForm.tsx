@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { X, Upload, Image, AlertCircle, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 type Hotel = {
   id?: string;
@@ -243,99 +246,150 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
         <Textarea value={form.cancellationPolicy || ""} onChange={(e) => handleChange("cancellationPolicy", e.target.value)} />
       </div>
 
-      <div>
-        <label className="text-sm font-medium">Images (séparées par des virgules) — ou téléversez ci-dessous</label>
-        <Input
-          value={imagesInput}
-          onChange={(e) => {
-            const value = e.target.value;
-            setImagesInput(value);
-            setImageUrls(value.split(",").map((s) => s.trim()).filter(Boolean));
-          }}
-        />
-      </div>
+      {/* Improved Image Upload Section */}
+      <Card className="rounded-xl border-2 border-dashed p-6 bg-muted/30">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Image className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Galerie d'images</h3>
+          </div>
 
-      <div>
-        <label className="text-sm font-medium">Téléversement d'images</label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={async (e) => {
-            const files = Array.from(e.target.files || []);
-            if (!files.length) return;
-            setUploading(true);
-            setUploadError(null);
-            try {
-              const fd = new FormData();
-              files.forEach((f) => fd.append("files", f));
-              const res = await fetch("/api/uploads", { method: "POST", body: fd });
-              if (!res.ok) throw new Error("Upload failed");
-              const data = await res.json();
-              if (data && Array.isArray(data.urls)) {
-                const combined = [...imageUrls, ...data.urls];
-                setImageUrls(combined);
-                setImagesInput(combined.join(", "));
-              }
-            } catch (err: any) {
-              console.error(err);
-              setUploadError("Erreur lors de l'upload des images.");
-            } finally {
-              setUploading(false);
-            }
-          }}
-        />
-        {uploading && <div className="text-sm text-muted-foreground">Téléversement en cours…</div>}
-        {uploadError && <div className="text-sm text-destructive">{uploadError}</div>}
-
-        {/* Preview */}
-        <div className="flex gap-2 mt-2 flex-wrap">
-          {imageUrls.map((src, i) => (
-            <div key={i} className="relative w-24 h-16">
-              <img src={src} alt={`img-${i}`} className="w-full h-full object-cover rounded-md" />
-              <button
-                type="button"
-                onClick={() => {
-                  const nextUrls = imageUrls.filter((_, index) => index !== i);
-                  setImageUrls(nextUrls);
-                  setImagesInput(nextUrls.join(", "));
-                }}
-                className="absolute top-1 right-1 rounded-full bg-black/70 text-white text-xs px-2 py-1"
-              >
-                Supprimer
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="text-sm font-medium">Commodités / équipements (séparés par des virgules)</label>
-        <Input
-          value={amenitiesInput}
-          onChange={(e) => {
-            const value = e.target.value;
-            setAmenitiesInput(value);
-            setAmenitiesList(value.split(",").map((item) => item.trim()).filter(Boolean));
-          }}
-        />
-        <div className="flex flex-wrap gap-2 mt-2">
-          {amenitiesList.map((amenity, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => {
-                const nextAmenities = amenitiesList.filter((_, idx) => idx !== index);
-                setAmenitiesList(nextAmenities);
-                setAmenitiesInput(nextAmenities.join(", "));
+          {/* File Input */}
+          <label className="block cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={async (e) => {
+                const files = Array.from(e.target.files || []);
+                if (!files.length) return;
+                setUploading(true);
+                setUploadError(null);
+                try {
+                  const fd = new FormData();
+                  files.forEach((f) => fd.append("files", f));
+                  const res = await fetch("/api/uploads", { method: "POST", body: fd });
+                  if (!res.ok) throw new Error("Upload failed");
+                  const data = await res.json();
+                  if (data && Array.isArray(data.urls)) {
+                    const combined = [...imageUrls, ...data.urls];
+                    setImageUrls(combined);
+                    setImagesInput(combined.join(", "));
+                    toast.success(`${data.urls.length} image(s) téléversée(s)`);
+                  }
+                } catch (err: any) {
+                  console.error(err);
+                  setUploadError("Erreur lors de l'upload des images.");
+                  toast.error("Erreur lors de l'upload");
+                } finally {
+                  setUploading(false);
+                }
               }}
-              className="rounded-full border border-muted px-3 py-1 text-sm text-foreground hover:bg-muted"
-            >
-              {amenity} ×
-            </button>
-          ))}
+              className="hidden"
+            />
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary transition-colors">
+              <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm font-medium text-foreground mb-1">
+                Cliquez pour sélectionner des images
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ou glissez-les ici (JPG, PNG, WebP)
+              </p>
+            </div>
+          </label>
+
+          {/* Upload Status */}
+          {uploading && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="animate-spin">⏳</div>
+              Téléversement en cours…
+            </div>
+          )}
+          {uploadError && (
+            <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded">
+              <AlertCircle className="w-4 h-4" />
+              {uploadError}
+            </div>
+          )}
+
+          {/* Image Preview Grid */}
+          {imageUrls.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">{imageUrls.length} image(s) ajoutée(s)</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {imageUrls.map((src, i) => (
+                  <div key={i} className="relative group">
+                    <div className="w-full aspect-square rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={src}
+                        alt={`preview-${i}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextUrls = imageUrls.filter((_, index) => index !== i);
+                        setImageUrls(nextUrls);
+                        setImagesInput(nextUrls.join(", "));
+                      }}
+                      className="absolute -top-2 -right-2 bg-destructive rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Hidden URLs input */}
+          <Input
+            type="hidden"
+            value={imagesInput}
+            onChange={(e) => {
+              const value = e.target.value;
+              setImagesInput(value);
+              setImageUrls(value.split(",").map((s) => s.trim()).filter(Boolean));
+            }}
+          />
         </div>
-      </div>
+      </Card>
+
+      {/* Amenities Section */}
+      <Card className="rounded-xl border p-6 bg-muted/50">
+        <div className="space-y-4">
+          <h3 className="font-semibold">Commodités / Équipements</h3>
+          <Input
+            value={amenitiesInput}
+            onChange={(e) => {
+              const value = e.target.value;
+              setAmenitiesInput(value);
+              setAmenitiesList(value.split(",").map((item) => item.trim()).filter(Boolean));
+            }}
+            placeholder="Wifi, Parking, Climatisation, Téléviseur, Minibar... (séparés par des virgules)"
+          />
+          {amenitiesList.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {amenitiesList.map((amenity, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => {
+                    const nextAmenities = amenitiesList.filter((_, idx) => idx !== index);
+                    setAmenitiesList(nextAmenities);
+                    setAmenitiesInput(nextAmenities.join(", "));
+                  }}
+                  className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-foreground hover:bg-primary/20 transition-colors flex items-center gap-1"
+                >
+                  {amenity}
+                  <X className="w-3 h-3" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </Card>
 
       <div className="flex items-center gap-4">
         <label className="flex items-center gap-2">

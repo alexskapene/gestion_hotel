@@ -3,7 +3,8 @@ import { auth } from "@/lib/auth";
 import { AdminSubscriptionService } from "@/services/admin/subscription.service";
 
 const extractId = (req: Request) => {
-  const segments = req.nextUrl.pathname.split("/");
+  const pathname = new URL(req.url).pathname;
+  const segments = pathname.split("/");
   return segments[segments.length - 1];
 };
 

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       checkOut: new Date(body.checkOut),
       totalPrice: Number(body.totalPrice),
       guests: Number(body.guests) || 1,
-      clientId: (session.user as any).id,
+      userId: (session.user as any).id,
       acompte: 0,
     });
 

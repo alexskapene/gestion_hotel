@@ -6,17 +6,25 @@ export class RoomService {
    * Add a new room to a hotel
    */
   static async createRoom(data: {
-    number: string;
+    roomNumber: string;
+    title: string;
     price: number;
     capacity: number;
     hotelId: string;
     categoryId: string;
     description?: string;
-    amenities?: any;
-    images?: any;
+    bedCount?: number;
+    bathroomCount?: number;
+    size?: number;
+    status?: RoomStatus;
   }) {
-    return prisma.chambre.create({
+    return prisma.room.create({
       data,
+      include: {
+        category: true,
+        images: true,
+        amenities: true,
+      },
     });
   }
 
@@ -24,12 +32,34 @@ export class RoomService {
    * Get all rooms for a specific hotel
    */
   static async getRoomsByHotel(hotelId: string) {
-    return prisma.chambre.findMany({
+    return prisma.room.findMany({
       where: { hotelId },
       include: {
         category: true,
+        images: true,
+        amenities: true,
+        reservations: {
+          where: {
+            status: "CONFIRMED",
+          },
+        },
       },
-      orderBy: { number: "asc" },
+      orderBy: { roomNumber: "asc" },
+    });
+  }
+
+  /**
+   * Get a single room
+   */
+  static async getRoomById(id: string) {
+    return prisma.room.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        images: true,
+        amenities: true,
+        reservations: true,
+      },
     });
   }
 
@@ -37,17 +67,45 @@ export class RoomService {
    * Update room details or status
    */
   static async updateRoom(id: string, data: any) {
-    return prisma.chambre.update({
+    return prisma.room.update({
       where: { id },
       data,
+      include: {
+        category: true,
+        images: true,
+        amenities: true,
+      },
     });
   }
 
   /**
-   * Manage room categories for a hotel
+   * Delete a room
+   */
+  static async deleteRoom(id: string) {
+    return prisma.room.delete({
+      where: { id },
+    });
+  }
+
+  /**
+   * Get room categories for a hotel
+   */
+  static async getCategoriesByHotel(hotelId: string) {
+    return prisma.roomCategory.findMany({
+      where: { hotelId },
+      include: {
+        _count: {
+          select: { rooms: true },
+        },
+      },
+    });
+  }
+
+  /**
+   * Create a room category
    */
   static async createCategory(hotelId: string, name: string, description?: string) {
-    return prisma.categorieChambre.create({
+    return prisma.roomCategory.create({
       data: {
         hotelId,
         name,
@@ -56,9 +114,28 @@ export class RoomService {
     });
   }
 
-  static async getCategoriesByHotel(hotelId: string) {
-    return prisma.categorieChambre.findMany({
-      where: { hotelId },
+  /**
+   * Find or create a room category by name for a hotel
+   */
+  static async findOrCreateCategory(hotelId: string, name: string, description?: string) {
+    const categoryName = name.trim();
+    const existingCategory = await prisma.roomCategory.findFirst({
+      where: {
+        hotelId,
+        name: categoryName,
+      },
+    });
+
+    if (existingCategory) {
+      return existingCategory;
+    }
+
+    return prisma.roomCategory.create({
+      data: {
+        hotelId,
+        name: categoryName,
+        description,
+      },
     });
   }
 }

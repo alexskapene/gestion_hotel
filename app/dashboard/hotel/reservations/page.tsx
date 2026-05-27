@@ -1,181 +1,162 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Search, 
-  CalendarDays, 
-  Users, 
-  Phone,
-  Mail,
-  CheckCircle2,
-  AlertCircle,
-  XCircle,
-  Clock,
-  Check,
-  X
-} from "lucide-react"
-
-const reservations = [
-  {
-    id: 1,
-    client: "Jean Dupont",
-    email: "jean.dupont@email.com",
-    phone: "+243 99 111 2222",
-    room: "Suite Deluxe",
-    roomNumber: "301",
-    checkIn: "15 Avril 2026",
-    checkOut: "18 Avril 2026",
-    status: "confirmed",
-    price: 255,
-    acompte: 100,
-    guests: 2,
-    createdAt: "10 Avril 2026",
-  },
-  {
-    id: 2,
-    client: "Marie Kabila",
-    email: "marie.k@email.com",
-    phone: "+243 99 333 4444",
-    room: "Chambre Double",
-    roomNumber: "205",
-    checkIn: "16 Avril 2026",
-    checkOut: "17 Avril 2026",
-    status: "pending",
-    price: 65,
-    acompte: 25,
-    guests: 2,
-    createdAt: "12 Avril 2026",
-  },
-  {
-    id: 3,
-    client: "Pierre Mwamba",
-    email: "pierre.m@email.com",
-    phone: "+243 99 555 6666",
-    room: "Chambre Simple",
-    roomNumber: "102",
-    checkIn: "17 Avril 2026",
-    checkOut: "20 Avril 2026",
-    status: "confirmed",
-    price: 120,
-    acompte: 50,
-    guests: 1,
-    createdAt: "11 Avril 2026",
-  },
-  {
-    id: 4,
-    client: "Sophie Kalala",
-    email: "sophie.k@email.com",
-    phone: "+243 99 777 8888",
-    room: "Suite Premium",
-    roomNumber: "401",
-    checkIn: "18 Avril 2026",
-    checkOut: "22 Avril 2026",
-    status: "pending",
-    price: 400,
-    acompte: 150,
-    guests: 3,
-    createdAt: "13 Avril 2026",
-  },
-  {
-    id: 5,
-    client: "Paul Kisangani",
-    email: "paul.k@email.com",
-    phone: "+243 99 999 0000",
-    room: "Chambre Double",
-    roomNumber: "208",
-    checkIn: "10 Avril 2026",
-    checkOut: "12 Avril 2026",
-    status: "completed",
-    price: 130,
-    acompte: 130,
-    guests: 2,
-    createdAt: "5 Avril 2026",
-  },
-  {
-    id: 6,
-    client: "Anne Mbeki",
-    email: "anne.m@email.com",
-    phone: "+243 99 123 4567",
-    room: "Suite Deluxe",
-    roomNumber: "303",
-    checkIn: "20 Avril 2026",
-    checkOut: "21 Avril 2026",
-    status: "cancelled",
-    price: 85,
-    acompte: 0,
-    guests: 2,
-    createdAt: "8 Avril 2026",
-  },
-]
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { CalendarDays, Users, Phone, Mail, CheckCircle2, AlertCircle, XCircle, Clock, Check, X } from "lucide-react";
+import { toast } from "sonner";
 
 const statusConfig = {
-  confirmed: { 
-    label: "Confirmé", 
-    icon: CheckCircle2, 
-    class: "bg-primary/10 text-primary" 
+  PENDING: {
+    label: "En attente",
+    icon: AlertCircle,
+    className: "bg-accent/10 text-accent",
   },
-  pending: { 
-    label: "En attente", 
-    icon: AlertCircle, 
-    class: "bg-accent/10 text-accent" 
+  CONFIRMED: {
+    label: "Confirmée",
+    icon: CheckCircle2,
+    className: "bg-primary/10 text-primary",
   },
-  completed: { 
-    label: "Terminé", 
-    icon: Clock, 
-    class: "bg-muted text-muted-foreground" 
+  COMPLETED: {
+    label: "Terminée",
+    icon: Clock,
+    className: "bg-muted text-muted-foreground",
   },
-  cancelled: { 
-    label: "Annulé", 
-    icon: XCircle, 
-    class: "bg-destructive/10 text-destructive" 
+  CANCELLED: {
+    label: "Annulée",
+    icon: XCircle,
+    className: "bg-destructive/10 text-destructive",
   },
+};
+
+type ReservationStatus = keyof typeof statusConfig | "all";
+
+interface HotelReservation {
+  id: string;
+  checkIn: string;
+  checkOut: string;
+  totalPrice: number;
+  paidAmount: number;
+  guests: number;
+  status: keyof typeof statusConfig;
+  room: {
+    title: string;
+    roomNumber: string;
+    hotel: {
+      id: string;
+      name: string;
+      city: string;
+    };
+  };
+  user: {
+    username?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  };
 }
 
-type ReservationStatus = keyof typeof statusConfig
-
 export default function HotelReservationsPage() {
-  const [activeTab, setActiveTab] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [hotelId, setHotelId] = useState<string | null>(null);
+  const [reservations, setReservations] = useState<HotelReservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<ReservationStatus>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const filteredReservations = reservations.filter(r => {
-    const matchesTab = activeTab === "all" || r.status === activeTab
-    const matchesSearch = r.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.room.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.roomNumber.includes(searchQuery)
-    return matchesTab && matchesSearch
-  })
+  useEffect(() => {
+    const fetchHotel = async () => {
+      try {
+        const response = await fetch("/api/hotels/me");
+        if (!response.ok) {
+          throw new Error("Impossible de récupérer l'hôtel");
+        }
+        const data = await response.json();
+        setHotelId(data?.id || data?.hotel?.id || null);
+      } catch (err) {
+        console.error(err);
+        setError("Impossible de récupérer l'hôtel");
+      }
+    };
+
+    fetchHotel();
+  }, []);
+
+  useEffect(() => {
+    if (!hotelId) return;
+
+    const fetchReservations = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const params = new URLSearchParams();
+        if (statusFilter !== "all") params.set("status", statusFilter);
+        if (searchQuery.trim()) params.set("search", searchQuery.trim());
+        if (fromDate) params.set("from", fromDate);
+        if (toDate) params.set("to", toDate);
+
+        const url = `/api/reservations/hotel/${hotelId}?${params.toString()}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          const body = await response.json();
+          throw new Error(body?.error || "Erreur lors du chargement des réservations");
+        }
+
+        const data = await response.json();
+        setReservations(data || []);
+      } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : "Erreur réseau");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReservations();
+  }, [hotelId, statusFilter, searchQuery, fromDate, toDate, refreshKey]);
 
   const stats = {
     total: reservations.length,
-    pending: reservations.filter(r => r.status === "pending").length,
-    confirmed: reservations.filter(r => r.status === "confirmed").length,
-    revenue: reservations.filter(r => r.status !== "cancelled").reduce((sum, r) => sum + r.acompte, 0),
-  }
+    pending: reservations.filter((item) => item.status === "PENDING").length,
+    confirmed: reservations.filter((item) => item.status === "CONFIRMED").length,
+    completed: reservations.filter((item) => item.status === "COMPLETED").length,
+    cancelled: reservations.filter((item) => item.status === "CANCELLED").length,
+    deposit: reservations.reduce((sum, item) => sum + (item.paidAmount || 0), 0),
+  };
+
+  const handleClearFilters = () => {
+    setStatusFilter("all");
+    setSearchQuery("");
+    setFromDate("");
+    setToDate("");
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
-        <h2 className="font-serif text-2xl font-bold">Gestion des Réservations</h2>
-        <p className="text-muted-foreground">Suivez et gérez toutes les réservations de votre hôtel</p>
+        <h2 className="font-serif text-2xl font-bold">Gestion des réservations</h2>
+        <p className="text-muted-foreground">
+          Consultez et filtrez les réservations de votre établissement.
+        </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="rounded-2xl">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Total Réservations</p>
+            <p className="text-sm text-muted-foreground">Total</p>
             <p className="font-serif text-2xl font-bold">{stats.total}</p>
           </CardContent>
         </Card>
         <Card className="rounded-2xl">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">En Attente</p>
+            <p className="text-sm text-muted-foreground">En attente</p>
             <p className="font-serif text-2xl font-bold text-accent">{stats.pending}</p>
           </CardContent>
         </Card>
@@ -187,128 +168,161 @@ export default function HotelReservationsPage() {
         </Card>
         <Card className="rounded-2xl">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Acomptes Reçus</p>
-            <p className="font-serif text-2xl font-bold text-chart-4">${stats.revenue}</p>
+            <p className="text-sm text-muted-foreground">Acomptes</p>
+            <p className="font-serif text-2xl font-bold text-chart-4">${stats.deposit}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Rechercher par client, chambre..."
-          className="rounded-full pl-11"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4">
+        <div className="relative">
+          <CalendarDays className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher par client, chambre, réservation..."
+            className="pl-11"
+          />
+        </div>
+        <Button onClick={handleClearFilters} variant="outline" className="h-11">
+          Réinitialiser
+        </Button>
       </div>
 
-      {/* Tabs & List */}
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="rounded-full">
-          <TabsTrigger value="all" className="rounded-full">Toutes</TabsTrigger>
-          <TabsTrigger value="pending" className="rounded-full">En attente</TabsTrigger>
-          <TabsTrigger value="confirmed" className="rounded-full">Confirmées</TabsTrigger>
-          <TabsTrigger value="completed" className="rounded-full">Terminées</TabsTrigger>
-          <TabsTrigger value="cancelled" className="rounded-full">Annulées</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label className="text-sm font-medium">Statut</label>
+          <select
+            className="mt-2 block w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as ReservationStatus)}
+          >
+            <option value="all">Toutes</option>
+            <option value="PENDING">En attente</option>
+            <option value="CONFIRMED">Confirmées</option>
+            <option value="COMPLETED">Terminées</option>
+            <option value="CANCELLED">Annulées</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-medium">Arrivée à partir de</label>
+          <Input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">Départ avant</label>
+          <Input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
+        </div>
+      </div>
 
-        <TabsContent value={activeTab} className="mt-6">
-          {filteredReservations.length > 0 ? (
-            <div className="space-y-4">
-              {filteredReservations.map((reservation) => {
-                const status = statusConfig[reservation.status as ReservationStatus]
-                const StatusIcon = status.icon
-                return (
-                  <Card key={reservation.id} className="rounded-2xl">
-                    <CardContent className="p-5">
-                      <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                        {/* Client Info */}
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <Users className="w-6 h-6 text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold">{reservation.client}</h3>
-                            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                {reservation.email}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Phone className="w-3 h-3" />
-                                {reservation.phone}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Room Info */}
-                        <div className="flex-1">
-                          <p className="font-medium">{reservation.room} - {reservation.roomNumber}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <CalendarDays className="w-3 h-3" />
-                            {reservation.checkIn} - {reservation.checkOut}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {reservation.guests} personne(s)
-                          </p>
-                        </div>
-
-                        {/* Price Info */}
-                        <div className="text-right">
-                          <Badge className={`rounded-full mb-2 ${status.class}`}>
-                            <StatusIcon className="w-3 h-3 mr-1" />
-                            {status.label}
-                          </Badge>
-                          <div className="space-y-1">
-                            <p className="text-sm text-muted-foreground">
-                              Total: <span className="font-semibold text-foreground">${reservation.price}</span>
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Acompte: <span className="font-semibold text-primary">${reservation.acompte}</span>
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        {reservation.status === "pending" && (
-                          <div className="flex gap-2 lg:flex-col">
-                            <Button size="sm" className="rounded-full bg-primary flex-1">
-                              <Check className="w-4 h-4 mr-1" />
-                              Confirmer
-                            </Button>
-                            <Button size="sm" variant="outline" className="rounded-full text-destructive flex-1">
-                              <X className="w-4 h-4 mr-1" />
-                              Refuser
-                            </Button>
-                          </div>
-                        )}
-                        {reservation.status === "confirmed" && (
-                          <Button size="sm" variant="outline" className="rounded-full">
-                            Terminer
-                          </Button>
-                        )}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, index) => (
+            <Card key={index} className="rounded-2xl animate-pulse h-40" />
+          ))}
+        </div>
+      ) : error ? (
+        <Card className="rounded-2xl">
+          <CardContent className="p-8 text-center">
+            <p className="text-destructive font-semibold">{error}</p>
+            <Button className="mt-4" onClick={() => setRefreshKey((prev) => prev + 1)}>
+              Réessayer
+            </Button>
+          </CardContent>
+        </Card>
+      ) : reservations.length === 0 ? (
+        <Card className="rounded-2xl">
+          <CardContent className="py-12 text-center">
+            <CalendarDays className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Aucune réservation</h3>
+            <p className="text-muted-foreground">
+              Aucun enregistrement ne correspond aux filtres sélectionnés.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {reservations.map((reservation) => {
+            const status = statusConfig[reservation.status];
+            const StatusIcon = status.icon;
+            const guestName = reservation.user?.username || reservation.user?.email || "Client";
+            return (
+              <Card key={reservation.id} className="rounded-2xl">
+                <CardContent className="p-5">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Users className="w-5 h-5 text-primary" />
                       </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          ) : (
-            <Card className="rounded-2xl">
-              <CardContent className="py-12 text-center">
-                <CalendarDays className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-semibold text-lg mb-2">Aucune réservation</h3>
-                <p className="text-muted-foreground">
-                  Aucune réservation dans cette catégorie.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+                      <div>
+                        <p className="font-semibold">{guestName}</p>
+                        <div className="mt-1 text-sm text-muted-foreground space-y-1">
+                          {reservation.user?.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail className="w-3 h-3" />
+                              {reservation.user.email}
+                            </div>
+                          )}
+                          {reservation.user?.phone && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="w-3 h-3" />
+                              {reservation.user.phone}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex-1">
+                      <p className="font-medium">{reservation.room.title} — Chambre {reservation.room.roomNumber}</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-2 mt-2">
+                        <CalendarDays className="w-3 h-3" />
+                        {new Date(reservation.checkIn).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} — {new Date(reservation.checkOut).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{reservation.guests} personne(s)</p>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge className={`rounded-full px-3 py-1 ${status.className}`}>
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {status.label}
+                      </Badge>
+                      <div className="text-right space-y-1">
+                        <p className="text-sm text-muted-foreground">
+                          Total: <span className="font-semibold text-foreground">€{reservation.totalPrice}</span>
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Acompte: <span className="font-semibold text-primary">€{reservation.paidAmount}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {reservation.status === "PENDING" && (
+                      <div className="flex gap-2 flex-col lg:flex-row">
+                        <Button size="sm" className="rounded-full bg-primary">
+                          <Check className="w-4 h-4 mr-1" />
+                          Confirmer
+                        </Button>
+                        <Button size="sm" variant="outline" className="rounded-full text-destructive">
+                          <X className="w-4 h-4 mr-1" />
+                          Annuler
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
-  )
+  );
 }

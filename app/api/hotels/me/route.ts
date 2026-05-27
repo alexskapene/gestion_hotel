@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { HotelService } from "@/services/hotel.service";
+import { HotelService } from "@/services/hotel";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,12 @@ export async function GET(request: Request) {
 
     const userId = (session.user as any).id;
     const hotel = await HotelService.getHotelByOwner(userId);
-    return NextResponse.json(hotel || null);
+    
+    if (!hotel) {
+      return NextResponse.json({ name: "Mon Hôtel" }, { status: 200 });
+    }
+    
+    return NextResponse.json(hotel);
   } catch (error) {
     console.error("GET /api/hotels/me error:", error);
     return NextResponse.json({ error: "Failed to fetch hotel" }, { status: 500 });

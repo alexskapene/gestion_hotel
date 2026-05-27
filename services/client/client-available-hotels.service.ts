@@ -11,9 +11,9 @@ export class ClientAvailableHotelsService {
         isVerified: true,
         ...(search && {
           OR: [
-            { name: { contains: search, mode: "insensitive" } },
-            { city: { contains: search, mode: "insensitive" } },
-            { description: { contains: search, mode: "insensitive" } },
+            { name: { contains: search } },
+            { city: { contains: search } },
+            { description: { contains: search } },
           ],
         }),
       },

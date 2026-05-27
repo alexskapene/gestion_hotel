@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import HotelProfileForm from "@/components/dashboard/HotelProfileForm";
-import { HotelService } from "@/services/hotel.service";
+import { HotelService } from "@/services/hotel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function HotelProfilePage() {
@@ -26,8 +26,7 @@ export default async function HotelProfilePage() {
           <CardTitle className="font-serif">Informations</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* @ts-expect-error server -> client prop */}
-          <HotelProfileForm initial={hotel} />
+            <HotelProfileForm initial={hotel} />
         </CardContent>
       </Card>
     </div>

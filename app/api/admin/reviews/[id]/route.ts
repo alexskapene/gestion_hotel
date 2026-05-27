@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { AdminReviewService } from "@/services/admin/review.service";
 
 const extractId = (req: Request) => {
-  const segments = req.nextUrl.pathname.split("/");
+  const segments = new URL(req.url).pathname.split("/");
   return segments[segments.length - 1];
 };
 

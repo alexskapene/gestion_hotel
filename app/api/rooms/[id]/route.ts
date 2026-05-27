@@ -18,3 +18,18 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to update room" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    await RoomService.deleteRoom(id);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    const { id } = await params;
+    console.error(`DELETE /api/rooms/${id} error:`, error);
+    return NextResponse.json({ error: "Failed to delete room" }, { status: 500 });
+  }
+}

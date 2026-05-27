@@ -20,11 +20,11 @@ export class PaymentService {
         if (filters?.search) {
             const search = filters.search;
             where.OR = [
-                { transactionId: { contains: search, mode: "insensitive" } },
-                { paymentMethod: { contains: search, mode: "insensitive" } },
+                { transactionId: { contains: search } },
+                { paymentMethod: { contains: search } },
                 { reservation: { id: { contains: search } } },
-                { reservation: { user: { email: { contains: search, mode: "insensitive" } } } },
-                { reservation: { user: { username: { contains: search, mode: "insensitive" } } } },
+                { reservation: { user: { email: { contains: search } } } },
+                { reservation: { user: { username: { contains: search } } } },
             ];
         }
 
@@ -33,7 +33,7 @@ export class PaymentService {
         }
 
         if (filters?.method && filters.method !== "ALL") {
-            where.paymentMethod = { contains: filters.method, mode: "insensitive" };
+            where.paymentMethod = { contains: filters.method };
         }
 
         if (filters?.reservationId) {

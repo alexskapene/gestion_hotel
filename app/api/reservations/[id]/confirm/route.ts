@@ -36,14 +36,14 @@ export async function POST(
     const userId = (session.user as any).id;
     const role = (session.user as any).role;
 
-    if (role === "CLIENT" && reservation.clientId !== userId) {
+    if (role === "CLIENT" && reservation.userId !== userId) {
       return NextResponse.json(
         { error: "Accès non autorisé." },
         { status: 403 },
       );
     }
 
-    if (role === "HOTEL" && reservation.room.hotel.userId !== userId) {
+    if (role === "HOTEL_OWNER" && reservation.room.hotel.ownerId !== userId) {
       return NextResponse.json(
         { error: "Accès non autorisé." },
         { status: 403 },

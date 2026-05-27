@@ -12,8 +12,8 @@ export class AdminSubscriptionService {
           search
             ? {
                 OR: [
-                  { planName: { contains: search, mode: "insensitive" } },
-                  { hotel: { name: { contains: search, mode: "insensitive" } } },
+                  { planName: { contains: search } },
+                  { hotel: { name: { contains: search } } },
                 ],
               }
             : {},
@@ -75,9 +75,9 @@ export class AdminSubscriptionService {
       where: search
         ? {
             OR: [
-              { transactionId: { contains: search, mode: "insensitive" } },
-              { paymentMethod: { contains: search, mode: "insensitive" } },
-              { subscription: { hotel: { name: { contains: search, mode: "insensitive" } } } },
+              { transactionId: { contains: search } },
+              { paymentMethod: { contains: search } },
+              { subscription: { hotel: { name: { contains: search } } } },
             ],
           }
         : {},

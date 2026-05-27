@@ -1,11 +1,11 @@
 import NextAuth from "next-auth";
-import { authConfig } from "./auth.config";
+import { authConfig } from "@/auth.config";
 import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
-  const { nextUrl } = req;
+  const nextUrl = new URL(req.url);
   const isLoggedIn = !!req.auth;
   const userRole = (req.auth?.user as any)?.role;
 
@@ -16,22 +16,13 @@ export default auth((req) => {
     }
 
     // Role-based access control
-    if (
-      nextUrl.pathname.startsWith("/dashboard/admin") &&
-      userRole !== "ADMIN"
-    ) {
+    if (nextUrl.pathname.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
-    if (
-      nextUrl.pathname.startsWith("/dashboard/hotel") &&
-      userRole !== "HOTEL_OWNER"
-    ) {
+    if (nextUrl.pathname.startsWith("/dashboard/hotel") && userRole !== "HOTEL_OWNER") {
       return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
-    if (
-      nextUrl.pathname.startsWith("/dashboard/client") &&
-      userRole !== "CLIENT"
-    ) {
+    if (nextUrl.pathname.startsWith("/dashboard/client") && userRole !== "CLIENT") {
       return NextResponse.redirect(new URL("/dashboard", nextUrl));
     }
   }

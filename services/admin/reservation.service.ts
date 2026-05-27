@@ -12,12 +12,12 @@ export class AdminReservationService {
           search
             ? {
                 OR: [
-                  { id: { contains: search, mode: "insensitive" } },
-                  { room: { roomNumber: { contains: search, mode: "insensitive" } } },
-                  { room: { title: { contains: search, mode: "insensitive" } } },
-                  { room: { hotel: { name: { contains: search, mode: "insensitive" } } } },
-                  { user: { username: { contains: search, mode: "insensitive" } } },
-                  { user: { email: { contains: search, mode: "insensitive" } } },
+                  { id: { contains: search } },
+                  { room: { roomNumber: { contains: search } } },
+                  { room: { title: { contains: search } } },
+                  { room: { hotel: { name: { contains: search } } } },
+                  { user: { username: { contains: search } } },
+                  { user: { email: { contains: search } } },
                 ],
               }
             : {},

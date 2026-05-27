@@ -5,7 +5,7 @@ export class AdminUserService {
   /**
    * Récupérer tous les utilisateurs avec recherche et filtres
    */
-  static async getAllUsers(params: { search?: string; role?: string; isActive?: string; isVerified?: string } = {}) {
+  static async getAllUsers(params: { search?: string; role?: string; isActive?: string; isVerified?: string; page?: string; limit?: string } = {}) {
     const { search, role, isActive, isVerified } = params;
     
     const [users, total] = await Promise.all([

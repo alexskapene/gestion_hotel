@@ -30,7 +30,6 @@ export class HotelService {
    * Create or update hotel details for a given owner.
    */
   static async upsertHotel(userId: string, data: any) {
-    // Extract relational arrays (images, amenities) if provided
     const images: string[] = Array.isArray(data.images)
       ? data.images
       : typeof data.images === "string"
@@ -43,7 +42,6 @@ export class HotelService {
       ? data.amenities.split(",").map((s: string) => s.trim()).filter(Boolean)
       : [];
 
-    // Prepare scalar hotel data
     const hotelData: any = {
       ...data,
       images: undefined,
@@ -65,7 +63,6 @@ export class HotelService {
         where: { id: existingHotel.id },
         data: {
           ...hotelData,
-          // replace images and amenities by clearing and recreating
           images: { deleteMany: {}, create: images.map((url) => ({ imageUrl: url })) },
           amenities: amenities.length
             ? { deleteMany: {}, create: amenities.map((name) => ({ name })) }
@@ -84,9 +81,6 @@ export class HotelService {
     });
   }
 
-  /**
-   * Get all hotels with search and filters
-   */
   static async getHotels(filters: { city?: string; stars?: number; isActive?: boolean } = {}) {
     return prisma.hotel.findMany({
       where: {
@@ -94,38 +88,25 @@ export class HotelService {
         isActive: filters.isActive ?? true,
       },
       include: {
-        _count: {
-          select: { rooms: true },
-        },
+        _count: { select: { rooms: true } },
       },
       orderBy: { averageRating: "desc" },
     });
   }
 
-  /**
-   * Get a single hotel with its rooms and categories
-   */
   static async getHotelById(id: string) {
     return prisma.hotel.findUnique({
       where: { id },
       include: {
-        rooms: {
-          include: { category: true },
-        },
+        rooms: { include: { category: true } },
         roomCategories: true,
         images: true,
         amenities: true,
-        subscriptions: {
-          where: { status: "ACTIVE" },
-          take: 1,
-        },
+        subscriptions: { where: { status: "ACTIVE" }, take: 1 },
       },
     });
   }
 
-  /**
-   * Get a hotel by its owner user id
-   */
   static async getHotelByOwner(ownerId: string) {
     return prisma.hotel.findFirst({
       where: { ownerId },
@@ -139,13 +120,7 @@ export class HotelService {
     });
   }
 
-  /**
-   * Update hotel status
-   */
   static async updateStatus(id: string, isActive: boolean) {
-    return prisma.hotel.update({
-      where: { id },
-      data: { isActive },
-    });
+    return prisma.hotel.update({ where: { id }, data: { isActive } });
   }
 }

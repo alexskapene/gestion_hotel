@@ -8,7 +8,7 @@ export const GET = auth(async (req) => {
   }
 
   try {
-    const segments = req.nextUrl.pathname.split("/");
+    const segments = new URL(req.url).pathname.split("/");
     const id = segments[segments.length - 1];
     if (!id) {
       return NextResponse.json({ error: "ID manquant" }, { status: 400 });
@@ -32,7 +32,7 @@ export const PATCH = auth(async (req) => {
   }
 
   try {
-    const segments = req.nextUrl.pathname.split("/");
+    const segments = new URL(req.url).pathname.split("/");
     const id = segments[segments.length - 1];
     if (!id) {
       return NextResponse.json({ error: "ID manquant" }, { status: 400 });
@@ -57,7 +57,7 @@ export const DELETE = auth(async (req) => {
   }
 
   try {
-    const segments = req.nextUrl.pathname.split("/");
+    const segments = new URL(req.url).pathname.split("/");
     const id = segments[segments.length - 1];
     if (!id) {
       return NextResponse.json({ error: "ID manquant" }, { status: 400 });

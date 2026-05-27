@@ -1,11 +1,12 @@
 import prisma from "@/lib/prisma";
+const db: any = prisma as any;
 
 export class VisiteurService {
     /**
      * Create a new visiteur
      */
     static async createVisiteur(data: any) {
-        return prisma.visiteur.create({
+        return db.visiteur.create({
             data,
         });
     }
@@ -14,14 +15,14 @@ export class VisiteurService {
      * Get all visiteurs
      */
     static async getAllVisiteurs() {
-        return prisma.visiteur.findMany();
+        return db.visiteur.findMany();
     }
 
     /**
      * Get a single visiteur by ID
      */
     static async getVisiteurById(id: string) {
-        return prisma.visiteur.findUnique({
+        return db.visiteur.findUnique({
             where: { id },
         });
     }
@@ -30,7 +31,7 @@ export class VisiteurService {
      * Update a visiteur
      */
     static async updateVisiteur(id: string, data: any) {
-        return prisma.visiteur.update({
+        return db.visiteur.update({
             where: { id },
             data,
         });
@@ -40,7 +41,7 @@ export class VisiteurService {
      * Delete a visiteur
      */
     static async deleteVisiteur(id: string) {
-        return prisma.visiteur.delete({
+        return db.visiteur.delete({
             where: { id },
         });
     }
@@ -49,7 +50,7 @@ export class VisiteurService {
      * Get a visiteur with all their reservations
      */
     static async getVisiteurWithReservations(id: string) {
-        return prisma.visiteur.findUnique({
+        return db.visiteur.findUnique({
             where: { id },
             include: {
                 reservations: {
@@ -69,7 +70,7 @@ export class VisiteurService {
      * Search visiteurs by name or phone
      */
     static async searchVisiteurs(query: string) {
-        return prisma.visiteur.findMany({
+        return db.visiteur.findMany({
             where: {
                 OR: [
                     { name: { contains: query } },

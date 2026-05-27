@@ -22,12 +22,12 @@ export async function GET(
     const role = (session.user as any).role;
     const userId = (session.user as any).id;
 
-    if (role === "HOTEL") {
+    if (role === "HOTEL_OWNER") {
       const hotel = await prisma.hotel.findUnique({
         where: { id: hotelId },
       });
 
-      if (!hotel || hotel.userId !== userId) {
+        if (!hotel || hotel.ownerId !== userId) {
         return NextResponse.json(
           { error: "Accès non autorisé." },
           { status: 403 },
@@ -40,7 +40,21 @@ export async function GET(
       );
     }
 
-    const reservations = await ReservationService.getHotelReservations(hotelId);
+    const { searchParams } = new URL(request.url);
+    const statusParam = searchParams.get("status") || undefined;
+    const searchParam = searchParams.get("search") || undefined;
+    const fromParam = searchParams.get("from") || undefined;
+    const toParam = searchParams.get("to") || undefined;
+
+    const fromDate = fromParam ? new Date(fromParam) : undefined;
+    const toDate = toParam ? new Date(toParam) : undefined;
+
+    const reservations = await ReservationService.getHotelReservations(hotelId, {
+      status: statusParam as any,
+      search: searchParam,
+      from: fromDate,
+      to: toDate,
+    });
     return NextResponse.json(reservations);
   } catch (error) {
     const { hotelId } = await params;

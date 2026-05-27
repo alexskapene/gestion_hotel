@@ -6,10 +6,10 @@ export class AdminReviewService {
       where: search
         ? {
             OR: [
-              { comment: { contains: search, mode: "insensitive" } },
-              { user: { username: { contains: search, mode: "insensitive" } } },
-              { user: { email: { contains: search, mode: "insensitive" } } },
-              { hotel: { name: { contains: search, mode: "insensitive" } } },
+              { comment: { contains: search } },
+              { user: { username: { contains: search } } },
+              { user: { email: { contains: search } } },
+              { hotel: { name: { contains: search } } },
             ],
           }
         : {},

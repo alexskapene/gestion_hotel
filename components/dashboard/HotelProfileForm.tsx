@@ -102,7 +102,7 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
         ...form,
         images: imagesInput
           .split(",")
-          .map((s) => s.trim())
+          .map((s: string) => s.trim())
           .filter(Boolean),
         amenities: amenitiesList,
       };

@@ -3,16 +3,16 @@ import { Hotel, Reservation, User } from "@/types/types";
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=80`;
 
-export const Users: User[] = [
-  { id: "u1", name: "Alice Dubois", email: "alice@maison.com", role: "client" },
+export const Users: any[] = [
+  { id: "u1", name: "Alice Dubois", email: "alice@maison.com", role: "CLIENT" },
   {
     id: "u2",
     name: "Marc Laurent",
     email: "marc@hotelroyal.com",
-    role: "manager",
+    role: "HOTEL_OWNER",
     hotelId: "h1",
   },
-  { id: "u3", name: "Sophie Admin", email: "admin@maison.com", role: "admin" },
+  { id: "u3", name: "Sophie Admin", email: "admin@maison.com", role: "ADMIN" },
 ];
 
 export const Hotels: Hotel[] = [

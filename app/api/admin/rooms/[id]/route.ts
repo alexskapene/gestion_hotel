@@ -11,7 +11,7 @@ export const GET = auth(async (req) => {
   }
 
   try {
-    const id = req.nextUrl.pathname.split("/").pop();
+    const id = new URL(req.url).pathname.split("/").pop();
     if (!id) return NextResponse.json({ error: "ID manquant" }, { status: 400 });
 
     const room = await AdminRoomService.getRoomById(id);
@@ -36,7 +36,7 @@ export const PATCH = auth(async (req) => {
   }
 
   try {
-    const id = req.nextUrl.pathname.split("/").pop();
+    const id = new URL(req.url).pathname.split("/").pop();
     if (!id) return NextResponse.json({ error: "ID manquant" }, { status: 400 });
 
     const body = await req.json();
@@ -58,7 +58,7 @@ export const DELETE = auth(async (req) => {
   }
 
   try {
-    const id = req.nextUrl.pathname.split("/").pop();
+    const id = new URL(req.url).pathname.split("/").pop();
     if (!id) return NextResponse.json({ error: "ID manquant" }, { status: 400 });
 
     await AdminRoomService.deleteRoom(id);

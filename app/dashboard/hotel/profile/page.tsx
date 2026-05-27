@@ -26,8 +26,7 @@ export default async function HotelProfilePage() {
           <CardTitle className="font-serif">Informations</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* @ts-expect-error server -> client prop */}
-          <HotelProfileForm initial={hotel} />
+            <HotelProfileForm initial={hotel} />
         </CardContent>
       </Card>
     </div>

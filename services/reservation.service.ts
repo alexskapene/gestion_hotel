@@ -10,8 +10,7 @@ export class ReservationService {
     checkOut: Date;
     totalPrice: number;
     roomId: string;
-    clientId?: string;
-    visiteurId?: string;
+    userId: string;
     acompte?: number;
     guests?: number;
   }) {
@@ -22,7 +21,7 @@ export class ReservationService {
     }
 
     return prisma.$transaction(async (tx) => {
-      const room = await tx.chambre.findUnique({
+      const room = await tx.room.findUnique({
         where: { id: data.roomId },
       });
 
@@ -51,15 +50,14 @@ export class ReservationService {
           checkOut: data.checkOut,
           totalPrice: data.totalPrice,
           guests: data.guests ?? 1,
-          acompte: data.acompte ?? 0,
+          paidAmount: data.acompte ?? 0,
           status: BookingStatus.PENDING,
           roomId: data.roomId,
-          clientId: data.clientId,
-          visiteurId: data.visiteurId,
+          userId: data.userId,
         },
       });
 
-      await tx.chambre.update({
+      await tx.room.update({
         where: { id: data.roomId },
         data: { status: RoomStatus.OCCUPIED },
       });
@@ -91,7 +89,7 @@ export class ReservationService {
         data: { status: BookingStatus.CONFIRMED },
       });
 
-      await tx.chambre.update({
+      await tx.room.update({
         where: { id: reservation.roomId },
         data: { status: RoomStatus.OCCUPIED },
       });
@@ -101,20 +99,71 @@ export class ReservationService {
   }
 
   /**
-   * Get all reservations for a hotel dashboard
+   * Get all reservations for a hotel dashboard with optional filters
    */
-  static async getHotelReservations(hotelId: string) {
+  static async getHotelReservations(
+    hotelId: string,
+    filters: {
+      status?: BookingStatus;
+      search?: string;
+      from?: Date;
+      to?: Date;
+    } = {},
+  ) {
+    const where: any = {
+      room: { hotelId },
+    };
+
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    if (filters.search) {
+      where.OR = [
+        { id: { contains: filters.search } },
+        { user: { username: { contains: filters.search } } },
+        { user: { email: { contains: filters.search } } },
+        { room: { title: { contains: filters.search } } },
+        { room: { roomNumber: { contains: filters.search } } },
+      ];
+    }
+
+    if (filters.from) {
+      where.checkIn = { gte: filters.from };
+    }
+
+    if (filters.to) {
+      where.checkOut = { lte: filters.to };
+    }
+
     return prisma.reservation.findMany({
-      where: {
-        room: { hotelId },
-      },
+      where,
       include: {
-        room: true,
-        client: true,
-        visiteur: true,
+        room: {
+          include: {
+            hotel: {
+              select: {
+                id: true,
+                name: true,
+                city: true,
+              },
+            },
+            images: {
+              take: 1,
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            phone: true,
+          },
+        },
         payments: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { checkIn: "desc" },
     });
   }
 
@@ -130,7 +179,7 @@ export class ReservationService {
       data: {
         reservationId,
         amount,
-        method,
+        paymentMethod: method,
       },
     });
   }

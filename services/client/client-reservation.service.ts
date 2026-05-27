@@ -16,11 +16,11 @@ export class ClientReservationService {
         userId,
         ...(status && { status }),
         ...(search && {
-          OR: [
-            { id: { contains: search, mode: "insensitive" } },
-            { room: { title: { contains: search, mode: "insensitive" } } },
-            { room: { hotel: { name: { contains: search, mode: "insensitive" } } } },
-            { room: { hotel: { city: { contains: search, mode: "insensitive" } } } },
+            OR: [
+            { id: { contains: search } },
+            { room: { title: { contains: search } } },
+            { room: { hotel: { name: { contains: search } } } },
+            { room: { hotel: { city: { contains: search } } } },
           ],
         }),
       },

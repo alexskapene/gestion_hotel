@@ -92,7 +92,7 @@ export default function ClientFavoritesPage() {
       ) : hotels.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {hotels.map((hotel) => (
-            <div key={hotel.id as string} className="relative">
+            <div key={String(hotel.id)} className="relative">
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
                 <Badge className="bg-primary text-primary-foreground shadow-md">
                   {hotel.reservationCount}{" "}

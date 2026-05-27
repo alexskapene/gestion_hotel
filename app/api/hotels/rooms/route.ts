@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { RoomService } from "@/services/room.service";
-import { HotelService } from "@/services/hotel.service";
+import { HotelService } from "@/services/hotel";
 
 export const dynamic = "force-dynamic";
 

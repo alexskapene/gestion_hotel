@@ -52,6 +52,7 @@ export default function HotelRoomsPage() {
   const { data: session, status } = useSession()
   const [rooms, setRooms] = useState<Room[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [hotelId, setHotelId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -66,6 +67,22 @@ export default function HotelRoomsPage() {
       fetchRooms()
     }
   }, [session, status, refreshKey])
+
+  useEffect(() => {
+    const fetchHotel = async () => {
+      try {
+        const res = await fetch("/api/hotels/me")
+        if (!res.ok) return
+        const data = await res.json()
+        if (data?.id) setHotelId(data.id)
+        else if (data?.hotel?.id) setHotelId(data.hotel.id)
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    if (session?.user?.id) fetchHotel()
+  }, [session])
 
   const fetchRooms = async () => {
     try {
@@ -162,13 +179,11 @@ export default function HotelRoomsPage() {
             Gérez vos chambres et leurs tarifs
           </p>
         </div>
-        {categories.length > 0 && (
-          <AddRoomModal
-            categories={categories}
-            hotelId=""
-            onRoomAdded={() => setRefreshKey((prev) => prev + 1)}
-          />
-        )}
+        <AddRoomModal
+          categories={categories}
+          hotelId={hotelId || ""}
+          onRoomAdded={() => setRefreshKey((prev) => prev + 1)}
+        />
       </div>
 
       {/* Search Bar */}
@@ -188,13 +203,11 @@ export default function HotelRoomsPage() {
           <CardContent className="p-12 text-center">
             <BedDouble className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-4">Aucune chambre trouvée</p>
-            {categories.length > 0 && (
-              <AddRoomModal
-                categories={categories}
-                hotelId=""
-                onRoomAdded={() => setRefreshKey((prev) => prev + 1)}
-              />
-            )}
+            <AddRoomModal
+              categories={categories}
+              hotelId={hotelId || ""}
+              onRoomAdded={() => setRefreshKey((prev) => prev + 1)}
+            />
           </CardContent>
         </Card>
       ) : (

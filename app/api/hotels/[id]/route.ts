@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { HotelService } from "@/services/hotel.service";
+import { HotelService } from "@/services/hotel";
 
 export const dynamic = "force-dynamic";
 

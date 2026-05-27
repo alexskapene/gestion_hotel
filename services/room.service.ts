@@ -113,4 +113,29 @@ export class RoomService {
       },
     });
   }
+
+  /**
+   * Find or create a room category by name for a hotel
+   */
+  static async findOrCreateCategory(hotelId: string, name: string, description?: string) {
+    const categoryName = name.trim();
+    const existingCategory = await prisma.roomCategory.findFirst({
+      where: {
+        hotelId,
+        name: categoryName,
+      },
+    });
+
+    if (existingCategory) {
+      return existingCategory;
+    }
+
+    return prisma.roomCategory.create({
+      data: {
+        hotelId,
+        name: categoryName,
+        description,
+      },
+    });
+  }
 }

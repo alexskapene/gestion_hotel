@@ -63,18 +63,38 @@ export const POST = auth(async (req) => {
     }
 
     // Valider les données
-    if (!body.roomNumber || !body.title || !body.price || !body.capacity || !body.categoryId) {
+    if (!body.roomNumber || !body.title || !body.price || !body.capacity || (!body.categoryId && !body.categoryName)) {
       return NextResponse.json(
         { error: "Champs requis manquants" },
         { status: 400 }
       );
     }
 
-    // Créer la chambre
-    const room = await RoomService.createRoom({
-      ...body,
+    let categoryId = body.categoryId;
+    if (!categoryId && body.categoryName) {
+      const category = await RoomService.findOrCreateCategory(
+        hotel.id,
+        body.categoryName,
+      );
+      categoryId = category.id;
+    }
+
+    const roomData = {
+      roomNumber: body.roomNumber,
+      title: body.title,
+      description: body.description || undefined,
+      price: Number(body.price),
+      capacity: Number(body.capacity),
       hotelId: hotel.id,
-    });
+      categoryId,
+      bedCount: body.bedCount ? Number(body.bedCount) : undefined,
+      bathroomCount: body.bathroomCount ? Number(body.bathroomCount) : undefined,
+      size: body.size ? Number(body.size) : undefined,
+      status: body.status,
+    };
+
+    // Créer la chambre
+    const room = await RoomService.createRoom(roomData);
 
     return NextResponse.json(room, { status: 201 });
   } catch (error) {

@@ -42,13 +42,26 @@ export default function AddRoomModal({
     price: "",
     capacity: "1",
     categoryId: "",
+    categoryName: "",
     bedCount: "",
     bathroomCount: "",
     size: "",
   });
 
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const nextState = { ...prev, [field]: value };
+
+      if (field === "categoryName" && value.trim().length > 0) {
+        nextState.categoryId = "";
+      }
+
+      if (field === "categoryId" && value) {
+        nextState.categoryName = "";
+      }
+
+      return nextState;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,7 +70,7 @@ export default function AddRoomModal({
 
     try {
       // Validation
-      if (!formData.roomNumber || !formData.title || !formData.price || !formData.categoryId) {
+      if (!formData.roomNumber || !formData.title || !formData.price || (!formData.categoryId && !formData.categoryName)) {
         toast.error("Veuillez remplir tous les champs requis");
         setLoading(false);
         return;
@@ -69,7 +82,8 @@ export default function AddRoomModal({
         description: formData.description || undefined,
         price: parseFloat(formData.price),
         capacity: parseInt(formData.capacity),
-        categoryId: formData.categoryId,
+        categoryId: formData.categoryId || undefined,
+        categoryName: formData.categoryName ? formData.categoryName.trim() : undefined,
         bedCount: formData.bedCount ? parseInt(formData.bedCount) : undefined,
         bathroomCount: formData.bathroomCount ? parseInt(formData.bathroomCount) : undefined,
         size: formData.size ? parseFloat(formData.size) : undefined,
@@ -97,6 +111,7 @@ export default function AddRoomModal({
         price: "",
         capacity: "1",
         categoryId: "",
+        categoryName: "",
         bedCount: "",
         bathroomCount: "",
         size: "",
@@ -164,6 +179,18 @@ export default function AddRoomModal({
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground mt-2">
+              Si la catégorie n'existe pas, vous pouvez en saisir une nouvelle ci-dessous.
+            </p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Nouvelle catégorie</label>
+            <Input
+              value={formData.categoryName}
+              onChange={(e) => handleChange("categoryName", e.target.value)}
+              placeholder="ex: Suite Familiale"
+            />
           </div>
 
           {/* Description */}

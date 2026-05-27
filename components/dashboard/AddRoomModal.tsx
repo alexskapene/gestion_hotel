@@ -35,6 +35,7 @@ export default function AddRoomModal({
 }: AddRoomModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showNewCategory, setShowNewCategory] = useState(false);
   const [formData, setFormData] = useState({
     roomNumber: "",
     title: "",
@@ -61,6 +62,15 @@ export default function AddRoomModal({
       }
 
       return nextState;
+    });
+  };
+
+  const handleToggleNewCategory = () => {
+    setShowNewCategory((current) => {
+      if (current) {
+        setFormData((prev) => ({ ...prev, categoryName: "" }));
+      }
+      return !current;
     });
   };
 
@@ -166,7 +176,19 @@ export default function AddRoomModal({
 
           {/* Catégorie */}
           <div>
-            <label className="text-sm font-medium">Catégorie *</label>
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-sm font-medium">Catégorie *</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 px-2"
+                onClick={handleToggleNewCategory}
+              >
+                <Plus className="w-4 h-4" />
+                Ajouter
+              </Button>
+            </div>
             <Select value={formData.categoryId} onValueChange={(value) => handleChange("categoryId", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez une catégorie" />
@@ -179,18 +201,16 @@ export default function AddRoomModal({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground mt-2">
-              Si la catégorie n'existe pas, vous pouvez en saisir une nouvelle ci-dessous.
-            </p>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Nouvelle catégorie</label>
-            <Input
-              value={formData.categoryName}
-              onChange={(e) => handleChange("categoryName", e.target.value)}
-              placeholder="ex: Suite Familiale"
-            />
+            {showNewCategory && (
+              <div className="mt-3">
+                <label className="text-sm font-medium">Nouvelle catégorie</label>
+                <Input
+                  value={formData.categoryName}
+                  onChange={(e) => handleChange("categoryName", e.target.value)}
+                  placeholder="ex: Suite Familiale"
+                />
+              </div>
+            )}
           </div>
 
           {/* Description */}

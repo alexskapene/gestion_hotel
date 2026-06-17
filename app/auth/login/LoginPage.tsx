@@ -36,29 +36,6 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
-      // Pre-check: ensure user exists and is verified before calling signIn
-      try {
-        const checkRes = await fetch("/api/auth/check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: formData.email }),
-        });
-
-        if (checkRes.ok) {
-          const info = await checkRes.json();
-          if (info.exists && info.isVerified === false) {
-            const msg = "[AUTH_ERROR]: Votre compte n'est pas encore vérifié. Veuillez valider votre email.";
-            toast.error(msg);
-            console.error(msg);
-            setIsLoading(false);
-            return;
-          }
-        }
-      } catch (err) {
-        // if pre-check fails, continue to attempt signIn (don't block due to check failure)
-        console.warn("Pre-check failed, proceeding to signIn", err);
-      }
-
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,

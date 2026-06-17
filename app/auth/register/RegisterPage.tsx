@@ -27,6 +27,8 @@ export default function RegisterPage() {
   );
 
   const [isLoading, setIsLoading] = useState(false);
+  const [userCreated, setUserCreated] = useState(false);
+  const [createdUserId, setCreatedUserId] = useState<string | null>(null);
 
   // Client form state
   const [clientForm, setClientForm] = useState({
@@ -34,7 +36,6 @@ export default function RegisterPage() {
     email: "",
     password: "",
     phone: "",
-    address: "",
   });
 
   // Hotel owner form state (manager only)
@@ -42,6 +43,15 @@ export default function RegisterPage() {
     username: "",
     email: "",
     password: "",
+  });
+
+  // Hotel details form state
+  const [hotelDetailsForm, setHotelDetailsForm] = useState({
+    hotelName: "",
+    city: "",
+    address: "",
+    phone: "",
+    country: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,6 +67,7 @@ export default function RegisterPage() {
           email: clientForm.email,
           password: clientForm.password,
           username: clientForm.username,
+          phone: clientForm.phone,
           role: "CLIENT",
         };
       } else {
@@ -82,11 +93,53 @@ export default function RegisterPage() {
 
       toast.success("Compte créé avec succès");
 
-      const type = activeTab === "hotel" ? "hotel" : "client";
-      router.replace(`/onboarding?type=${type}`);
+      if (activeTab === "client") {
+        // Redirect to login for client
+        router.replace("/auth/login?type=client");
+      } else {
+        // For hotel owner, show hotel details form
+        setCreatedUserId(data.id);
+        setUserCreated(true);
+      }
     } catch (err: any) {
       console.error("Register error:", err);
       toast.error(err?.message || "Impossible de créer le compte");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleHotelDetailsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLoading || !createdUserId) return;
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/hotels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: createdUserId,
+          name: hotelDetailsForm.hotelName,
+          phone: hotelDetailsForm.phone,
+          city: hotelDetailsForm.city,
+          country: hotelDetailsForm.country,
+          address: hotelDetailsForm.address,
+          hotelType: "HOTEL",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Erreur lors de la création de l'hôtel");
+      }
+
+      toast.success("Hôtel créé avec succès");
+      router.replace("/auth/login?type=hotel");
+    } catch (error: any) {
+      toast.error(error?.message || "Impossible de créer l'hôtel");
+      console.error("Hotel creation error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -146,145 +199,253 @@ export default function RegisterPage() {
             </CardHeader>
 
             <CardContent>
-              <Tabs
-                value={activeTab}
-                onValueChange={(value) =>
-                  setActiveTab(value as "client" | "hotel")
-                }
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger
-                    value="client"
-                    className="flex items-center gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    Client
-                  </TabsTrigger>
+              {userCreated && activeTab === "hotel" ? (
+                // HOTEL DETAILS FORM
+                <div className="space-y-4">
+                  <div className="text-center space-y-2">
+                    <CardTitle className="font-serif text-2xl">
+                      Informations de l'hôtel
+                    </CardTitle>
+                    <CardDescription>
+                      Complétez les informations primordiales de votre hôtel
+                    </CardDescription>
+                  </div>
 
-                  <TabsTrigger
-                    value="hotel"
-                    className="flex items-center gap-2"
-                  >
-                    <Hotel className="w-4 h-4" />
-                    Hôtel
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* CLIENT */}
-                <TabsContent value="client">
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleHotelDetailsSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Nom d'utilisateur</label>
+                      <label className="text-sm font-medium">Nom de l'hôtel</label>
                       <Input
-                        type="text"
-                        placeholder="votre nom ou pseudo"
+                        placeholder="Hôtel Paradise"
+                        value={hotelDetailsForm.hotelName}
+                        onChange={(e) =>
+                          setHotelDetailsForm({
+                            ...hotelDetailsForm,
+                            hotelName: e.target.value,
+                          })
+                        }
                         required
-                        value={clientForm.username}
-                        onChange={(e) => setClientForm((p) => ({ ...p, username: e.target.value }))}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Email</label>
-
+                      <label className="text-sm font-medium">Téléphone</label>
                       <Input
-                        type="email"
-                        placeholder="exemple@gmail.com"
-                        className="h-11"
-                        required
-                        value={clientForm.email}
-                        onChange={(e) => setClientForm((p) => ({ ...p, email: e.target.value }))}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Mot de passe</label>
-
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        required
-                        value={clientForm.password}
-                        onChange={(e) => setClientForm((p) => ({ ...p, password: e.target.value }))}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Téléphone (optionnel)</label>
-                      <Input
-                        type="text"
+                        type="tel"
                         placeholder="+243..."
-                        value={clientForm.phone}
-                        onChange={(e) => setClientForm((p) => ({ ...p, phone: e.target.value }))}
+                        value={hotelDetailsForm.phone}
+                        onChange={(e) =>
+                          setHotelDetailsForm({
+                            ...hotelDetailsForm,
+                            phone: e.target.value,
+                          })
+                        }
+                        required
                       />
                     </div>
 
-                    <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Ville</label>
+                      <Input
+                        placeholder="Kinshasa"
+                        value={hotelDetailsForm.city}
+                        onChange={(e) =>
+                          setHotelDetailsForm({
+                            ...hotelDetailsForm,
+                            city: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Pays</label>
+                      <Input
+                        placeholder="RDC"
+                        value={hotelDetailsForm.country}
+                        onChange={(e) =>
+                          setHotelDetailsForm({
+                            ...hotelDetailsForm,
+                            country: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Adresse</label>
+                      <Input
+                        placeholder="Rue / quartier"
+                        value={hotelDetailsForm.address}
+                        onChange={(e) =>
+                          setHotelDetailsForm({
+                            ...hotelDetailsForm,
+                            address: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-11"
+                      disabled={isLoading}
+                    >
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Chargement...
+                          Création...
                         </>
                       ) : (
-                        "Créer un compte"
+                        "Créer l'hôtel"
                       )}
                     </Button>
                   </form>
-                </TabsContent>
+                </div>
+              ) : (
+                // REGISTRATION FORMS
+                <Tabs
+                  value={activeTab}
+                  onValueChange={(value) =>
+                    setActiveTab(value as "client" | "hotel")
+                  }
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2 mb-6">
+                    <TabsTrigger
+                      value="client"
+                      className="flex items-center gap-2"
+                    >
+                      <User className="w-4 h-4" />
+                      Client
+                    </TabsTrigger>
 
-                {/* HOTEL */}
-                <TabsContent value="hotel">
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Nom du gérant (utilisateur)</label>
-                      <Input
-                        type="text"
-                        placeholder="Nom ou pseudo du gérant"
-                        required
-                        value={hotelForm.username}
-                        onChange={(e) => setHotelForm((p) => ({ ...p, username: e.target.value }))}
-                      />
-                    </div>
+                    <TabsTrigger
+                      value="hotel"
+                      className="flex items-center gap-2"
+                    >
+                      <Hotel className="w-4 h-4" />
+                      Hôtel
+                    </TabsTrigger>
+                  </TabsList>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Email professionnel</label>
+                  {/* CLIENT */}
+                  <TabsContent value="client">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Nom d'utilisateur</label>
+                        <Input
+                          type="text"
+                          placeholder="votre nom ou pseudo"
+                          required
+                          value={clientForm.username}
+                          onChange={(e) => setClientForm((p) => ({ ...p, username: e.target.value }))}
+                        />
+                      </div>
 
-                      <Input
-                        type="text"
-                        placeholder="Ex: Hôtel Résidence"
-                        className="h-11"
-                        required
-                        value={hotelForm.email}
-                        onChange={(e) => setHotelForm((p) => ({ ...p, email: e.target.value }))}
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Email</label>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Mot de passe</label>
+                        <Input
+                          type="email"
+                          placeholder="exemple@gmail.com"
+                          className="h-11"
+                          required
+                          value={clientForm.email}
+                          onChange={(e) => setClientForm((p) => ({ ...p, email: e.target.value }))}
+                        />
+                      </div>
 
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        required
-                        value={hotelForm.password}
-                        onChange={(e) => setHotelForm((p) => ({ ...p, password: e.target.value }))}
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Mot de passe</label>
 
-                    <Button type="submit" className="w-full h-11" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Chargement...
-                        </>
-                      ) : (
-                        "Continuer"
-                      )}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          required
+                          value={clientForm.password}
+                          onChange={(e) => setClientForm((p) => ({ ...p, password: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Téléphone (optionnel)</label>
+                        <Input
+                          type="text"
+                          placeholder="+243..."
+                          value={clientForm.phone}
+                          onChange={(e) => setClientForm((p) => ({ ...p, phone: e.target.value }))}
+                        />
+                      </div>
+
+                      <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Chargement...
+                          </>
+                        ) : (
+                          "Créer un compte"
+                        )}
+                      </Button>
+                    </form>
+                  </TabsContent>
+
+                  {/* HOTEL */}
+                  <TabsContent value="hotel">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Nom du gérant (utilisateur)</label>
+                        <Input
+                          type="text"
+                          placeholder="Nom ou pseudo du gérant"
+                          required
+                          value={hotelForm.username}
+                          onChange={(e) => setHotelForm((p) => ({ ...p, username: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Email professionnel</label>
+
+                        <Input
+                          type="text"
+                          placeholder="Ex: Hôtel Résidence"
+                          className="h-11"
+                          required
+                          value={hotelForm.email}
+                          onChange={(e) => setHotelForm((p) => ({ ...p, email: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Mot de passe</label>
+
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          required
+                          value={hotelForm.password}
+                          onChange={(e) => setHotelForm((p) => ({ ...p, password: e.target.value }))}
+                        />
+                      </div>
+
+                      <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Chargement...
+                          </>
+                        ) : (
+                          "Continuer"
+                        )}
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
+              )}
 
               <div className="mt-6 text-center text-sm text-muted-foreground">
                 Déjà un compte ?{" "}

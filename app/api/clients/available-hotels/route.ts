@@ -30,7 +30,10 @@ export const GET = auth(async (req) => {
       city: hotel.city,
       rating: hotel.averageRating || 0,
       price: hotel.rooms?.[0]?.price || 0,
-      image: [hotel.coverImage || hotel.logo || "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop"],
+      image: [
+        hotel.coverImage || hotel.logo || "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop",
+        ...hotel.images.map((img) => img.imageUrl),
+      ].filter(Boolean),
       amenities: hotel.amenities.map((a) => a.name.toLowerCase()),
       description: hotel.description,
       address: hotel.address,

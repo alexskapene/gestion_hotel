@@ -83,11 +83,11 @@ export const HotelDetailModal = () => {
   useEffect(() => {
     if (selectedHotel) {
       setActiveImage(0);
+      const roomsLength = selectedHotel.rooms?.length ?? 0;
       setSelectedRoom(
-        Math.min(
-          bookingRestore?.roomIndex ?? 0,
-          selectedHotel.rooms.length - 1,
-        ),
+        roomsLength > 0
+          ? Math.min(bookingRestore?.roomIndex ?? 0, roomsLength - 1)
+          : 0,
       );
       setCheckIn(bookingRestore?.checkIn ?? "");
       setCheckOut(bookingRestore?.checkOut ?? "");
@@ -120,8 +120,9 @@ export const HotelDetailModal = () => {
   if (!selectedHotel) return null;
 
   const hotel = selectedHotel;
-  const room = hotel.rooms[selectedRoom];
-  const roomAvailable = room.available !== false;
+  const rooms = hotel.rooms ?? [];
+  const room = rooms.length > 0 ? rooms[selectedRoom] ?? rooms[0] : null;
+  const roomAvailable = room ? room.available !== false : false;
 
   const nights =
     checkIn && checkOut
@@ -134,7 +135,7 @@ export const HotelDetailModal = () => {
         )
       : 0;
 
-  const total = Math.round(room.price * nights);
+  const total = room ? Math.round(room.price * nights) : 0;
 
   const redirectToLogin = () => {
     const callbackUrl = encodeURIComponent(
@@ -266,16 +267,16 @@ export const HotelDetailModal = () => {
       addReservation({
         hotelId: hotel.id,
         hotel: hotel.name,
-        room: room.type,
-        roomNumber: String(room.id),
+        room: room?.type ?? "",
+        roomNumber: String(room?.id ?? ""),
         userId: (session.user as any).id,
         userName: session.user?.name || "",
         checkIn,
         checkOut,
         guests,
-        price: room.price,
+        price: room?.price ?? 0,
         acompte: 0,
-        image: hotel.image[0],
+        image: (hotel.image ?? [])[0] ?? "",
         hotelPhone: "",
         hotelAddress: hotel.city,
         status: "confirmed",
@@ -345,14 +346,14 @@ export const HotelDetailModal = () => {
               <div className="flex flex-col max-h-[520px] lg:flex-row gap-6">
                 <div className=" lg:flex-3 overflow-hidden">
                   <img
-                    src={hotel.image[activeImage]}
+                    src={(hotel.image ?? [])[activeImage] ?? ""}
                     className="w-full h-full object-cover"
                   />
                 </div>
 
                 <div className="lg:flex-1 overflow-x-scroll">
                   <div className="flex lg:flex-col gap-4">
-                    {hotel.image.slice(1).map((img, i) => (
+                    {(hotel.image ?? []).slice(1).map((img, i) => (
                       <div
                         key={i}
                         className="w-[32%] h-full lg:w-full lg:h-[80%]"
@@ -410,8 +411,13 @@ export const HotelDetailModal = () => {
                 </p>
               </div>
 
+              {rooms.length === 0 ? (
+                <p className="text-muted-foreground text-center py-12">
+                  Aucune chambre disponible pour cet hôtel.
+                </p>
+              ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {hotel.rooms.map((r: any, i: number) => {
+                {rooms.map((r: any, i: number) => {
                   const available = r.available !== false;
                   const active = i === selectedRoom;
                   return (
@@ -457,6 +463,7 @@ export const HotelDetailModal = () => {
                   );
                 })}
               </div>
+              )}
             </div>
           )}
 
@@ -521,7 +528,7 @@ export const HotelDetailModal = () => {
                         <td scope="row" className="py-3">
                           Chambre
                         </td>
-                        <td className="pl-12 font-bold">{room.type}</td>
+                        <td className="pl-12 font-bold">{room?.type ?? "-"}</td>
                       </tr>
                       <tr>
                         <td scope="row" className="py-3">
@@ -533,7 +540,7 @@ export const HotelDetailModal = () => {
                         <td scope="row" className="py-3">
                           Prix par nuit
                         </td>
-                        <td className="pl-12 font-bold">${room.price}</td>
+                        <td className="pl-12 font-bold">${room?.price ?? 0}</td>
                       </tr>
                       <tr>
                         <td scope="row" className="py-3">

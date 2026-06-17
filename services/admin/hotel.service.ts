@@ -56,17 +56,23 @@ export class AdminHotelService {
     // Génération automatique du slug
     const slug = slugify(data.name, { lower: true, strict: true });
 
+    // Extraire les champs relationnels pour éviter les conflits Prisma
+    const { images, amenities, ownerId, ...rest } = data;
+
     return prisma.hotel.create({
       data: {
-        ...data,
+        ...rest,
         slug,
         isActive: false,   // Par défaut inactif (attente admin)
         isVerified: false, // Par défaut non vérifié
+        owner: {
+          connect: { id: ownerId }
+        },
         amenities: {
-          create: data.amenities?.map((name: string) => ({ name })) || []
+          create: amenities?.map((name: string) => ({ name })) || []
         },
         images: {
-          create: data.images?.map((imageUrl: string) => ({ imageUrl })) || []
+          create: images?.map((imageUrl: string) => ({ imageUrl })) || []
         }
       }
     });

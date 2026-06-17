@@ -156,13 +156,39 @@ export default function CreateHotelPage() {
 
     setIsSubmitting(true);
     try {
-      // NOTE: Dans un cas réel avec des fichiers, on utiliserait FormData
-      // Pour cet exemple, on simule l'envoi (on pourrait convertir en Base64 ou utiliser S3/Cloudinary)
-      
+      // 1. Upload du logo
+      let logoUrl: string | null = null;
+      if (logoFile) {
+        const fd = new FormData();
+        fd.append("logo", logoFile);
+        const res = await fetch("/api/uploads", { method: "POST", body: fd });
+        if (!res.ok) {
+          toast.error("Erreur lors de l'upload du logo");
+          return;
+        }
+        const data = await res.json();
+        logoUrl = data.urls?.[0] ?? null;
+      }
+
+      // 2. Upload des images de galerie
+      let imageUrls: string[] = [];
+      if (hotelFiles.length > 0) {
+        const fd = new FormData();
+        hotelFiles.forEach((file) => fd.append("images", file));
+        const res = await fetch("/api/uploads", { method: "POST", body: fd });
+        if (!res.ok) {
+          toast.error("Erreur lors de l'upload des images");
+          return;
+        }
+        const data = await res.json();
+        imageUrls = data.urls ?? [];
+      }
+
+      // 3. Créer l'hôtel avec les vraies URLs
       const payload = {
         ...formData,
-        logo: logoFile ? "logo_url_placeholder" : null, // Simulation
-        images: hotelFiles.map(() => "image_url_placeholder"), // Simulation
+        logo: logoUrl,
+        images: imageUrls,
       };
 
       const response = await fetch("/api/admin/hotels", {
@@ -428,51 +454,61 @@ export default function CreateHotelPage() {
                  </div>
 
                  <div className="space-y-6">
-                    {/* Logo Upload */}
-                    <div className="space-y-2">
-                      <Label>Logo de l&apos;hôtel (2Mo max)</Label>
-                      <div className="relative group">
-                        <label className={`flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-xl transition-all cursor-pointer ${logoFile ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/30 bg-muted/10'}`}>
-                          {logoFile ? (
-                            <div className="flex items-center gap-3 px-4">
-                              <ImageIcon className="w-6 h-6 text-primary" />
-                              <span className="text-xs font-medium truncate max-w-[150px]">{logoFile.name}</span>
-                              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => { e.preventDefault(); setLogoFile(null); }}>
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <>
-                              <Upload className="w-6 h-6 text-muted-foreground mb-1" />
-                              <span className="text-[10px] uppercase font-bold text-muted-foreground">Téléverser Logo</span>
-                            </>
-                          )}
-                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
-                        </label>
-                      </div>
-                    </div>
+                   {/* Logo Upload */}
+                   <div className="space-y-2">
+                     <Label>Logo de l&apos;hôtel (2Mo max)</Label>
+                     <div className="relative group">
+                       <label className={`flex flex-col items-center justify-center h-24 border-2 border-dashed rounded-xl transition-all cursor-pointer ${logoFile ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/30 bg-muted/10'}`}>
+                         {logoFile ? (
+                           <div className="flex items-center gap-3 px-4">
+                             <ImageIcon className="w-6 h-6 text-primary" />
+                             <span className="text-xs font-medium truncate max-w-[150px]">{logoFile.name}</span>
+                             <Button type="button" variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => { e.preventDefault(); setLogoFile(null); }}>
+                               <X className="w-4 h-4" />
+                             </Button>
+                           </div>
+                         ) : (
+                           <>
+                             <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                             <span className="text-[10px] uppercase font-bold text-muted-foreground">Téléverser Logo</span>
+                           </>
+                         )}
+                         <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
+                       </label>
+                     </div>
+                   </div>
 
-                    {/* Gallery Upload */}
-                    <div className="space-y-2">
-                      <Label>Galerie (Max 4 images, 2Mo max chacune)</Label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {hotelFiles.map((file, idx) => (
-                          <div key={idx} className="relative aspect-video rounded-lg border border-border bg-muted/20 flex items-center justify-center p-2 group">
-                             <span className="text-[10px] truncate max-w-full">{file.name}</span>
-                             <button onClick={() => removeFile(idx)} className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                               <X className="w-3 h-3" />
-                             </button>
-                          </div>
-                        ))}
-                        {hotelFiles.length < 4 && (
-                          <label className="aspect-video rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all">
-                            <Plus className="w-5 h-5 text-muted-foreground" />
-                            <span className="text-[10px] font-bold text-muted-foreground mt-1">AJOUTER</span>
-                            <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleFileChange(e, 'images')} />
-                          </label>
-                        )}
-                      </div>
-                    </div>
+                   {/* Gallery Upload */}
+                   <div className="space-y-2">
+                     <Label>Galerie (Max 4 images, 2Mo max chacune)</Label>
+                     <div className="grid grid-cols-2 gap-3">
+                       {hotelFiles.map((file, idx) => (
+                         <div key={idx} className="relative aspect-video rounded-lg border border-border overflow-hidden group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={file.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <button
+                                type="button"
+                                onClick={() => removeFile(idx)}
+                                className="bg-destructive text-white rounded-full p-1.5 shadow-lg"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                         </div>
+                       ))}
+                       {hotelFiles.length < 4 && (
+                         <label className="aspect-video rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all">
+                           <Plus className="w-5 h-5 text-muted-foreground" />
+                           <span className="text-[10px] font-bold text-muted-foreground mt-1">AJOUTER</span>
+                           <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleFileChange(e, 'images')} />
+                         </label>
+                       )}
+                     </div>
+                   </div>
                  </div>
               </div>
             </CardContent>

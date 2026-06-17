@@ -18,9 +18,7 @@ export class ClientAvailableHotelsService {
         }),
       },
       include: {
-        images: {
-          take: 1,
-        },
+        images: true,
         amenities: true,
         rooms: {
           where: { isActive: true },
@@ -68,9 +66,7 @@ export class ClientAvailableHotelsService {
         city,
       },
       include: {
-        images: {
-          take: 1,
-        },
+        images: true,
         amenities: true,
         rooms: {
           where: { isActive: true },

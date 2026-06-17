@@ -32,10 +32,6 @@ export class AuthService {
         throw new Error("Votre compte a été suspendu. Veuillez contacter le support.");
       }
 
-      if (!user.isVerified) {
-        throw new Error("Votre compte n'est pas encore vérifié. Veuillez valider votre email.");
-      }
-
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {

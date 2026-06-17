@@ -7,7 +7,7 @@ export class UserService {
    * Create a new user without créant l'hôtel.
    */
   static async createUser(data: any) {
-    const { email, password, username, role } = data;
+    const { email, password, username, role, phone } = data;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     return prisma.user.create({
@@ -16,6 +16,9 @@ export class UserService {
         username,
         password: hashedPassword,
         role: role || Role.CLIENT,
+        phone: phone || null,
+        isVerified: true,
+        isActive: true,
       },
     });
   }

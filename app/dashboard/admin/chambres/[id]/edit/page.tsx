@@ -32,7 +32,8 @@ import {
   Hotel,
   Maximize2,
   Bath,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
@@ -52,6 +53,8 @@ export default function EditRoomPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [roomImages, setRoomImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     roomNumber: "",
     title: "",
@@ -78,7 +81,7 @@ export default function EditRoomPage() {
         if (roomRes.ok && hotelsRes.ok) {
           const roomData = await roomRes.json();
           const hotelsData = await hotelsRes.json();
-          
+
           setHotels(hotelsData);
           setFormData({
             roomNumber: roomData.roomNumber,
@@ -93,6 +96,10 @@ export default function EditRoomPage() {
             categoryId: roomData.categoryId,
             status: roomData.status,
           });
+          // Load existing images
+          if (roomData.images && Array.isArray(roomData.images)) {
+            setRoomImages(roomData.images.map((img: any) => img.imageUrl));
+          }
         } else {
           toast.error("Erreur lors du chargement des données");
           router.push("/dashboard/admin/chambres");
@@ -129,6 +136,47 @@ export default function EditRoomPage() {
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    if (roomImages.length + files.length > 2) {
+      toast.error("Maximum 2 images autorisées");
+      return;
+    }
+
+    const MAX_SIZE = 2 * 1024 * 1024;
+    for (const file of files) {
+      if (file.size > MAX_SIZE) {
+        toast.error(`L'image ${file.name} dépasse 2MB`);
+        return;
+      }
+    }
+
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      files.forEach((f) => fd.append("files", f));
+      const res = await fetch("/api/uploads", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      if (data && Array.isArray(data.urls)) {
+        const combined = [...roomImages, ...data.urls];
+        setRoomImages(combined);
+        toast.success(`${data.urls.length} image(s) téléversée(s)`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setRoomImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentStep < STEPS.length) {
@@ -148,6 +196,7 @@ export default function EditRoomPage() {
           bedCount: parseInt(formData.bedCount),
           bathroomCount: parseInt(formData.bathroomCount),
           size: formData.size ? parseFloat(formData.size) : null,
+          images: roomImages,
         }),
       });
 
@@ -401,15 +450,57 @@ export default function EditRoomPage() {
             {/* STEP 3: Media */}
             {currentStep === 3 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="p-12 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ImageIcon className="text-primary w-8 h-8" />
-                  </div>
-                  <h3 className="text-lg font-serif font-bold">Photos de la chambre</h3>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-xs">
-                    Glissez-déposez ou cliquez pour ajouter les photos de l&apos;intérieur.
-                  </p>
+                <div>
+                  <label className="block cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      disabled={uploading || roomImages.length >= 2}
+                      className="hidden"
+                    />
+                    <div className="p-12 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
+                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <ImageIcon className="text-primary w-8 h-8" />
+                      </div>
+                      <h3 className="text-lg font-serif font-bold">Photos de la chambre</h3>
+                      <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+                        Cliquez pour ajouter les photos (Max 2, max 2MB chacune)
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">{roomImages.length}/2 images</p>
+                    </div>
+                  </label>
+                  {uploading && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3 justify-center">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Téléversement en cours...
+                    </div>
+                  )}
                 </div>
+
+                {roomImages.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {roomImages.map((src, i) => (
+                      <div key={i} className="relative group">
+                        <div className="aspect-square rounded-lg overflow-hidden border">
+                          <img
+                            src={src}
+                            alt={`room-${i}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(i)}
+                          className="absolute -top-2 -right-2 bg-destructive rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 flex items-start gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">

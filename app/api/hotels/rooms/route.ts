@@ -91,6 +91,7 @@ export const POST = auth(async (req) => {
       bathroomCount: body.bathroomCount ? Number(body.bathroomCount) : undefined,
       size: body.size ? Number(body.size) : undefined,
       status: body.status,
+      images: body.images,
     };
 
     // Créer la chambre

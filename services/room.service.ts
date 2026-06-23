@@ -17,9 +17,17 @@ export class RoomService {
     bathroomCount?: number;
     size?: number;
     status?: RoomStatus;
+    images?: string[];
   }) {
+    const { images, ...roomData } = data;
+
     return prisma.room.create({
-      data,
+      data: {
+        ...roomData,
+        images: images && images.length > 0
+          ? { create: images.map((url) => ({ imageUrl: url })) }
+          : undefined,
+      },
       include: {
         category: true,
         images: true,
@@ -67,9 +75,42 @@ export class RoomService {
    * Update room details or status
    */
   static async updateRoom(id: string, data: any) {
+    const { images, ...roomData } = data;
+
+    // Get existing room to manage images
+    const existingRoom = await prisma.room.findUnique({
+      where: { id },
+      include: { images: true },
+    });
+
+    if (!existingRoom) {
+      throw new Error("Room not found");
+    }
+
+    // Handle images update
+    let imagesData: any = {};
+    if (images !== undefined) {
+      // Delete all existing images
+      await prisma.roomImage.deleteMany({
+        where: { roomId: id },
+      });
+
+      // Create new images if provided
+      if (images.length > 0) {
+        imagesData = {
+          images: {
+            create: images.map((url: string) => ({ imageUrl: url })),
+          },
+        };
+      }
+    }
+
     return prisma.room.update({
       where: { id },
-      data,
+      data: {
+        ...roomData,
+        ...imagesData,
+      },
       include: {
         category: true,
         images: true,

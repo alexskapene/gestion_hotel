@@ -74,6 +74,7 @@ export const HotelDetailModal = () => {
   >("paypal");
   const [paymentDetail, setPaymentDetail] = useState("");
   const [payerName, setPayerName] = useState("");
+  const [pendingReservationId, setPendingReservationId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: session, status } = useSession();
 
@@ -179,19 +180,7 @@ export const HotelDetailModal = () => {
     setStep("BOOKING");
   };
 
-  const handlePaymentStep = () => {
-    if (!session) {
-      saveBookingState("PAYMENT");
-      redirectToLogin();
-      return;
-    }
-
-    setStep("PAYMENT");
-  };
-
-  const handleBook = async () => {
-    if (isLoadingSession) return;
-
+  const handlePaymentStep = async () => {
     if (!session) {
       saveBookingState("PAYMENT");
       redirectToLogin();
@@ -213,13 +202,6 @@ export const HotelDetailModal = () => {
     setIsSubmitting(true);
 
     try {
-      if (!payerName.trim() || !paymentDetail.trim()) {
-        setErrorMessage(
-          "Veuillez saisir le nom du titulaire et les détails du paiement.",
-        );
-        return;
-      }
-
       const createResponse = await fetch("/api/reservations", {
         method: "POST",
         headers: {
@@ -232,9 +214,6 @@ export const HotelDetailModal = () => {
           guests,
           totalPrice: total,
           clientId: String((session.user as any).id),
-          paymentMethod,
-          paymentReference: paymentDetail,
-          payerName,
         }),
       });
 
@@ -246,20 +225,61 @@ export const HotelDetailModal = () => {
         return;
       }
 
-      const confirmResponse = await fetch(
-        `/api/reservations/${createData.id}/confirm`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+      setPendingReservationId(createData.id);
+      setStep("PAYMENT");
+    } catch (error) {
+      setErrorMessage(
+        "Une erreur est survenue lors de la création de la réservation. Réessayez plus tard.",
       );
+      console.error("Create reservation error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-      const confirmData = await confirmResponse.json();
-      if (!confirmResponse.ok) {
+  const handleBook = async () => {
+    if (isLoadingSession) return;
+
+    if (!session) {
+      saveBookingState("PAYMENT");
+      redirectToLogin();
+      return;
+    }
+
+    if (!pendingReservationId) {
+      setErrorMessage("Aucune réservation en attente à payer.");
+      return;
+    }
+
+    setErrorMessage(null);
+
+    if (!payerName.trim() || !paymentDetail.trim()) {
+      setErrorMessage(
+        "Veuillez saisir le nom du titulaire et les détails du paiement.",
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const paymentResponse = await fetch("/api/payments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reservationId: pendingReservationId,
+          amount: total,
+          paymentMethod,
+          transactionId: paymentDetail,
+        }),
+      });
+
+      const paymentData = await paymentResponse.json();
+      if (!paymentResponse.ok) {
         setErrorMessage(
-          confirmData.error || "Impossible de confirmer la réservation.",
+          paymentData.error || "Impossible de traiter le paiement.",
         );
         return;
       }
@@ -275,7 +295,7 @@ export const HotelDetailModal = () => {
         checkOut,
         guests,
         price: room?.price ?? 0,
-        acompte: 0,
+        acompte: total,
         image: (hotel.image ?? [])[0] ?? "",
         hotelPhone: "",
         hotelAddress: hotel.city,
@@ -285,9 +305,9 @@ export const HotelDetailModal = () => {
       setStep("SUCCESS");
     } catch (error) {
       setErrorMessage(
-        "Une erreur est survenue lors du processus de réservation. Réessayez plus tard.",
+        "Une erreur est survenue lors du paiement. Réessayez plus tard.",
       );
-      console.error("Booking error:", error);
+      console.error("Payment error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -473,6 +493,12 @@ export const HotelDetailModal = () => {
                 <h2 className="text-4xl font-bold">Informations réservation</h2>
               </div>
 
+              {errorMessage && (
+                <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-destructive">
+                  {errorMessage}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div>
@@ -560,7 +586,9 @@ export const HotelDetailModal = () => {
               <div>
                 <h2 className="text-4xl font-bold">Paiement</h2>
                 <p className="text-muted-foreground mt-2">
-                  Choisissez un mode de paiement et confirmez votre réservation.
+                  Choisissez un mode de paiement. La réservation sera d'abord
+                  enregistrée en statut <strong>EN ATTENTE</strong>, puis confirmée
+                  une fois le paiement validé.
                 </p>
               </div>
 
@@ -731,11 +759,11 @@ export const HotelDetailModal = () => {
               {step === "BOOKING" && (
                 <Button
                   disabled={
-                    !checkIn || !checkOut || nights <= 0 || !roomAvailable
+                    isSubmitting || !checkIn || !checkOut || nights <= 0 || !roomAvailable
                   }
                   onClick={handlePaymentStep}
                 >
-                  Paiement
+                  {isSubmitting ? "Création..." : "Paiement"}
                 </Button>
               )}
             </div>

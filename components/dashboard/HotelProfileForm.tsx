@@ -90,8 +90,62 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
   const [message, setMessage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(form.logo || null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(form.coverImage || null);
 
   const handleChange = (k: keyof Hotel, v: any) => setForm({ ...form, [k]: v });
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const fd = new FormData();
+      fd.append("files", file);
+      const res = await fetch("/api/uploads", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      if (data && Array.isArray(data.urls) && data.urls.length > 0) {
+        handleChange("logo", data.urls[0]);
+        setLogoPreview(data.urls[0]);
+        toast.success("Logo téléversé avec succès");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setUploadError("Erreur lors de l'upload du logo.");
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const fd = new FormData();
+      fd.append("files", file);
+      const res = await fetch("/api/uploads", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      if (data && Array.isArray(data.urls) && data.urls.length > 0) {
+        handleChange("coverImage", data.urls[0]);
+        setCoverPreview(data.urls[0]);
+        toast.success("Image de couverture téléversée avec succès");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setUploadError("Erreur lors de l'upload de l'image de couverture.");
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,15 +265,51 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
           <Input value={form.website} onChange={(e) => handleChange("website", e.target.value)} />
         </div>
         <div>
-          <label className="text-sm font-medium">Logo (URL)</label>
-          <Input value={form.logo || ""} onChange={(e) => handleChange("logo", e.target.value)} />
+          <label className="text-sm font-medium">Logo</label>
+          <div className="space-y-2">
+            <label className="block cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm font-medium text-foreground">Cliquez pour uploader le logo</p>
+              </div>
+            </label>
+            {logoPreview && (
+              <div className="relative w-24 h-24 rounded-lg overflow-hidden border">
+                <img src={logoPreview} alt="Logo preview" className="w-full h-full object-contain" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium">Image de couverture (URL)</label>
-          <Input value={form.coverImage || ""} onChange={(e) => handleChange("coverImage", e.target.value)} />
+          <label className="text-sm font-medium">Image de couverture</label>
+          <div className="space-y-2">
+            <label className="block cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverUpload}
+                className="hidden"
+              />
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm font-medium text-foreground">Cliquez pour uploader l'image de couverture</p>
+              </div>
+            </label>
+            {coverPreview && (
+              <div className="relative w-full h-32 rounded-lg overflow-hidden border">
+                <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
         </div>
         <div>
           <label className="text-sm font-medium">Coordonnées (lat, lng)</label>
@@ -233,11 +323,11 @@ export default function HotelProfileForm({ initial }: { initial?: any }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium">Check-in (heure)</label>
-          <Input value={form.checkInTime || ""} onChange={(e) => handleChange("checkInTime", e.target.value)} />
+          <Input type="time" value={form.checkInTime || ""} onChange={(e) => handleChange("checkInTime", e.target.value)} />
         </div>
         <div>
           <label className="text-sm font-medium">Check-out (heure)</label>
-          <Input value={form.checkOutTime || ""} onChange={(e) => handleChange("checkOutTime", e.target.value)} />
+          <Input type="time" value={form.checkOutTime || ""} onChange={(e) => handleChange("checkOutTime", e.target.value)} />
         </div>
       </div>
 

@@ -67,9 +67,19 @@ export class AdminRoomService {
         amenities: {
           create: amenities?.map((name: string) => ({ name })) || []
         },
-        images: {
-          create: images?.map((imageUrl: string) => ({ imageUrl })) || []
-        }
+        images: images && images.length > 0
+          ? { create: images.map((imageUrl: string) => ({ imageUrl })) }
+          : undefined
+      },
+      include: {
+        hotel: {
+          select: { id: true, name: true }
+        },
+        category: {
+          select: { id: true, name: true }
+        },
+        images: true,
+        amenities: true
       }
     });
   }
@@ -80,23 +90,66 @@ export class AdminRoomService {
   static async updateRoom(id: string, data: any) {
     const { amenities, images, ...rest } = data;
 
-    // Pour simplifier, on supprime et on recrée les relations simples si elles sont fournies
+    // Get existing room to manage images
+    const existingRoom = await prisma.room.findUnique({
+      where: { id },
+      include: { images: true },
+    });
+
+    if (!existingRoom) {
+      throw new Error("Room not found");
+    }
+
+    // Handle images update
+    let imagesData: any = {};
+    if (images !== undefined) {
+      // Delete all existing images
+      await prisma.roomImage.deleteMany({
+        where: { roomId: id },
+      });
+
+      // Create new images if provided
+      if (images.length > 0) {
+        imagesData = {
+          images: {
+            create: images.map((url: string) => ({ imageUrl: url })),
+          },
+        };
+      }
+    }
+
+    // Handle amenities update
+    let amenitiesData: any = {};
+    if (amenities !== undefined) {
+      await prisma.roomAmenity.deleteMany({
+        where: { roomId: id },
+      });
+
+      if (amenities.length > 0) {
+        amenitiesData = {
+          amenities: {
+            create: amenities.map((name: string) => ({ name })),
+          },
+        };
+      }
+    }
+
     return prisma.room.update({
       where: { id },
       data: {
         ...rest,
-        ...(amenities && {
-          amenities: {
-            deleteMany: {},
-            create: amenities.map((name: string) => ({ name }))
-          }
-        }),
-        ...(images && {
-          images: {
-            deleteMany: {},
-            create: images.map((imageUrl: string) => ({ imageUrl }))
-          }
-        })
+        ...imagesData,
+        ...amenitiesData,
+      },
+      include: {
+        hotel: {
+          select: { id: true, name: true }
+        },
+        category: {
+          select: { id: true, name: true }
+        },
+        images: true,
+        amenities: true
       }
     });
   }

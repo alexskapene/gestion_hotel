@@ -28,7 +28,8 @@ export const GET = auth(async (req) => {
       id: hotel.id,
       name: hotel.name,
       city: hotel.city,
-      rating: hotel.averageRating || 0,
+      rating: hotel.averageRating ?? hotel.stars ?? 0,
+      stars: hotel.stars ?? 0,
       price: hotel.rooms?.[0]?.price || 0,
       image: [
         hotel.coverImage || hotel.logo || "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=300&fit=crop",
@@ -39,7 +40,17 @@ export const GET = auth(async (req) => {
       address: hotel.address,
       phone: hotel.phone,
       email: hotel.email,
-      reviewCount: hotel._count.reviews,
+      reviews: hotel._count.reviews,
+      rooms: hotel.rooms.map((room) => ({
+        id: room.id,
+        type: room.title,
+        price: room.price,
+        capacity: room.capacity,
+        description: room.description || "",
+        amenities: room.amenities.map((a) => a.name.toLowerCase()),
+        image: room.images?.[0]?.imageUrl || "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400",
+        available: room.isActive && room.status === "AVAILABLE",
+      })),
     }));
 
     return NextResponse.json(formattedHotels);

@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface AddRoomModalProps {
@@ -36,6 +36,8 @@ export default function AddRoomModal({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [roomImages, setRoomImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     roomNumber: "",
     title: "",
@@ -74,6 +76,49 @@ export default function AddRoomModal({
     });
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    // Check max 2 images total
+    if (roomImages.length + files.length > 2) {
+      toast.error("Maximum 2 images autorisées");
+      return;
+    }
+
+    // Check each file size (max 2MB)
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    for (const file of files) {
+      if (file.size > MAX_SIZE) {
+        toast.error(`L'image ${file.name} dépasse 2MB`);
+        return;
+      }
+    }
+
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      files.forEach((f) => fd.append("files", f));
+      const res = await fetch("/api/uploads", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      if (data && Array.isArray(data.urls)) {
+        const combined = [...roomImages, ...data.urls];
+        setRoomImages(combined);
+        toast.success(`${data.urls.length} image(s) téléversée(s)`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setRoomImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -97,6 +142,7 @@ export default function AddRoomModal({
         bedCount: formData.bedCount ? parseInt(formData.bedCount) : undefined,
         bathroomCount: formData.bathroomCount ? parseInt(formData.bathroomCount) : undefined,
         size: formData.size ? parseFloat(formData.size) : undefined,
+        images: roomImages,
       };
 
       const response = await fetch("/api/hotels/rooms", {
@@ -126,6 +172,7 @@ export default function AddRoomModal({
         bathroomCount: "",
         size: "",
       });
+      setRoomImages([]);
       onRoomAdded();
     } catch (error: any) {
       console.error(error);
@@ -288,6 +335,56 @@ export default function AddRoomModal({
               placeholder="ex: 30"
               step="0.1"
             />
+          </div>
+
+          {/* Images */}
+          <div>
+            <label className="text-sm font-medium">Images de la chambre (Max 2, max 2MB chacune)</label>
+            <div className="space-y-3">
+              <label className="block cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  disabled={uploading || roomImages.length >= 2}
+                  className="hidden"
+                />
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                  <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm font-medium text-foreground">Cliquez pour uploader les images</p>
+                  <p className="text-xs text-muted-foreground">{roomImages.length}/2 images</p>
+                </div>
+              </label>
+              {uploading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Téléversement en cours...
+                </div>
+              )}
+              {roomImages.length > 0 && (
+                <div className="grid grid-cols-2 gap-2">
+                  {roomImages.map((src, i) => (
+                    <div key={i} className="relative group">
+                      <div className="w-full aspect-square rounded-lg overflow-hidden border">
+                        <img
+                          src={src}
+                          alt={`room-${i}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(i)}
+                        className="absolute -top-2 -right-2 bg-destructive rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Boutons */}

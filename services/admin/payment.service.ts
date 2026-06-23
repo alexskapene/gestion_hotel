@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { PaymentStatus } from "@prisma/client";
+import { BookingStatus, PaymentStatus } from "@prisma/client";
 
 export class PaymentService {
     /**
@@ -153,10 +153,30 @@ export class PaymentService {
         transactionId?: string;
     }) {
         return prisma.$transaction(async (tx) => {
+            const reservation = await tx.reservation.findUnique({
+                where: { id: data.reservationId },
+            });
+
+            if (!reservation) {
+                throw new Error("Réservation introuvable.");
+            }
+
             const payment = await tx.payment.create({
                 data: {
                     ...data,
                     status: PaymentStatus.COMPLETED,
+                },
+            });
+
+            const paidAmount = reservation.paidAmount + data.amount;
+            await tx.reservation.update({
+                where: { id: data.reservationId },
+                data: {
+                    paidAmount,
+                    status:
+                        reservation.status === BookingStatus.PENDING
+                            ? BookingStatus.CONFIRMED
+                            : reservation.status,
                 },
             });
 

@@ -232,9 +232,6 @@ export const HotelDetailModal = () => {
           guests,
           totalPrice: total,
           clientId: String((session.user as any).id),
-          paymentMethod,
-          paymentReference: paymentDetail,
-          payerName,
         }),
       });
 
@@ -246,20 +243,23 @@ export const HotelDetailModal = () => {
         return;
       }
 
-      const confirmResponse = await fetch(
-        `/api/reservations/${createData.id}/confirm`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const paymentResponse = await fetch("/api/payments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          reservationId: createData.id,
+          amount: total,
+          paymentMethod,
+          transactionId: paymentDetail,
+        }),
+      });
 
-      const confirmData = await confirmResponse.json();
-      if (!confirmResponse.ok) {
+      const paymentData = await paymentResponse.json();
+      if (!paymentResponse.ok) {
         setErrorMessage(
-          confirmData.error || "Impossible de confirmer la réservation.",
+          paymentData.error || "Impossible de traiter le paiement.",
         );
         return;
       }
@@ -275,7 +275,7 @@ export const HotelDetailModal = () => {
         checkOut,
         guests,
         price: room?.price ?? 0,
-        acompte: 0,
+        acompte: total,
         image: (hotel.image ?? [])[0] ?? "",
         hotelPhone: "",
         hotelAddress: hotel.city,

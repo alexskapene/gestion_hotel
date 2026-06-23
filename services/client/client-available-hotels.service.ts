@@ -22,10 +22,10 @@ export class ClientAvailableHotelsService {
         amenities: true,
         rooms: {
           where: { isActive: true },
-          select: {
-            price: true,
+          include: {
+            images: true,
+            amenities: true,
           },
-          take: 1,
           orderBy: { price: "asc" },
         },
         _count: {
@@ -70,10 +70,10 @@ export class ClientAvailableHotelsService {
         amenities: true,
         rooms: {
           where: { isActive: true },
-          select: {
-            price: true,
+          include: {
+            images: true,
+            amenities: true,
           },
-          take: 1,
           orderBy: { price: "asc" },
         },
         _count: {
